@@ -1,4 +1,4 @@
 {
-  "buildCommand": "cd qietr-sdk && npm install && npm run build && cd ../qietr-web && npm install && npm run build",
+  "installCommand": "cd qietr-sdk && npm install && npm run build && cd ../qietr-web && npm install",
   "framework": "nextjs"
 }
