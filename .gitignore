@@ -49,3 +49,5 @@ desktop.ini
 # Local-only docs not for public repo
 NOTES_LOCAL.md
 TODO_LOCAL.md
+
+.vercel

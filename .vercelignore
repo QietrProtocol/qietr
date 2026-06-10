@@ -1,0 +1,9 @@
+node_modules
+dist
+.git
+.github
+docs
+prxvt-data
+*.md
+IMPLEMENTATION_PLAN.md
+SESSION_STATE.md
