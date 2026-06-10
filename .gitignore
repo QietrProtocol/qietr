@@ -1,0 +1,51 @@
+# Secrets / credentials — never commit
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.keystore
+secrets/
+credentials/
+.pat
+*token*.txt
+
+# Local research / inspiration material (not part of public repo)
+research/
+*-inspiration/
+prxvt-data/
+
+# Internal comparison docs not for public repo
+docs/dev/PRXVT-vs-QIETR.md
+
+# Node / web
+node_modules/
+dist/
+build/
+.next/
+out/
+coverage/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Rust / Anchor
+target/
+**/*.rs.bk
+Cargo.lock.bak
+test-ledger/
+.anchor/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.recommended.json
+
+# Local-only docs not for public repo
+NOTES_LOCAL.md
+TODO_LOCAL.md

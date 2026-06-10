@@ -1,0 +1,27 @@
+{
+  "name": "@qietr/indexer-api",
+  "version": "0.1.0-alpha",
+  "description": "HTTP API serving merkle proofs and tier/nullifier state for Qietr.",
+  "author": "Qietr Protocol",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "circomlibjs": "^0.1.7",
+    "fastify": "^4.28.1",
+    "pg": "^8.13.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.5.4"
+  }
+}

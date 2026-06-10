@@ -1,0 +1,27 @@
+{
+  "name": "@qietr/relayer",
+  "version": "0.1.0-alpha",
+  "description": "Fee-payer relayer for Qietr shielded withdraw transactions.",
+  "author": "Qietr Protocol",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "fastify": "^4.28.1"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "tsx": "^4.19.2",
+    "@types/node": "^20.14.0"
+  },
+  "peerDependencies": {
+    "@solana/web3.js": "^1.95.0"
+  }
+}

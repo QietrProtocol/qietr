@@ -1,0 +1,20 @@
+{
+  "name": "@qietr/circuits",
+  "version": "0.1.0-alpha",
+  "private": true,
+  "description": "Zero-knowledge circuits for the Qietr shielded payments protocol.",
+  "license": "UNLICENSED",
+  "scripts": {
+    "compile": "bash scripts/compile.sh",
+    "setup:dev": "bash scripts/setup-dev.sh",
+    "export-vk": "bash scripts/export-vk.sh",
+    "test": "node --test --test-timeout=600000 \"test/**/*.test.js\"",
+    "clean": "rm -rf build keys ptau"
+  },
+  "devDependencies": {
+    "circomlib": "^2.0.5",
+    "circomlibjs": "^0.1.7",
+    "ffjavascript": "^0.3.0",
+    "snarkjs": "^0.7.4"
+  }
+}

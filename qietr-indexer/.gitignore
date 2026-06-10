@@ -1,0 +1,23 @@
+# Rust
+/geyser-plugin/target/
+**/*.rs.bk
+Cargo.lock
+
+# Node
+node_modules/
+dist/
+*.tsbuildinfo
+.npm/
+
+# Local env
+.env
+.env.*
+!.env.example
+
+# Postgres dumps
+*.dump
+*.sql.bak
+
+# OS junk
+.DS_Store
+Thumbs.db

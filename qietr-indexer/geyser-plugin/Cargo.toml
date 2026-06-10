@@ -1,0 +1,44 @@
+[package]
+name = "qietr_indexer_geyser"
+version = "0.1.0-alpha"
+authors = ["Qietr Protocol"]
+description = "Geyser plugin for the Qietr shielded pool indexer"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "qietr_indexer_geyser"
+
+[dependencies]
+# Pinned to the same Agave/Solana cycle as qietr-pool so account encodings
+# stay byte-compatible. Re-pin together when the platform-tools upgrade
+# tracked in SESSION_STATE.md unblocks.
+# 1.18.x for now — the Agave 2.x rename to `agave-geyser-plugin-interface`
+# will land alongside the toolchain upgrade tracked in SESSION_STATE.md.
+# The trait API is unchanged across this range, so the plugin source is
+# binary-portable.
+solana-geyser-plugin-interface = "=1.18.26"
+solana-program = "=1.18.26"
+log = "0.4"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Account decoding (Anchor wire format = 8-byte discriminator || borsh).
+borsh = "0.10"
+sha2 = "0.10"
+
+# Synchronous Postgres client + thread-safe connection pool. Sync (not
+# tokio) is deliberate — Geyser callbacks run on the validator's banking
+# thread and cannot block on an async runtime without risking validator
+# stalls. The worker thread that drains our write queue uses these.
+postgres = "0.19"
+r2d2 = "0.8"
+r2d2_postgres = "0.18"
+crossbeam-channel = "0.5"
+
+# Anchor `emit!` events are stored in the transaction's program-data log
+# as base64-encoded payloads prefixed by `Program data: `. We decode them
+# without pulling in the full anchor-client.
+base64 = "0.22"

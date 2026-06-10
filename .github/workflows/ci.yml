@@ -1,0 +1,177 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: -D warnings
+
+jobs:
+  sdk:
+    name: SDK (typecheck + test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-sdk
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: qietr-sdk/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  web:
+    name: Web (typecheck + lint + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: qietr-web/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run build
+
+  circuits:
+    name: Circuits (test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-circuits
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: qietr-circuits/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  relayer:
+    name: Relayer (typecheck + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-relayer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: qietr-relayer/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+  indexer-api:
+    name: Indexer API (typecheck + build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-indexer/api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: qietr-indexer/api/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+
+  pool:
+    name: Pool program (cargo check)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-pool
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            qietr-pool/target
+          key: ${{ runner.os }}-cargo-pool-${{ hashFiles('qietr-pool/Cargo.lock') }}
+      - run: cargo check
+
+  escrow:
+    name: Escrow program (cargo check)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-escrow
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            qietr-escrow/target
+          key: ${{ runner.os }}-cargo-escrow-${{ hashFiles('qietr-escrow/Cargo.lock') }}
+      - run: cargo check
+
+  msg:
+    name: Msg program (cargo check)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-msg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            qietr-msg/target
+          key: ${{ runner.os }}-cargo-msg-${{ hashFiles('qietr-msg/Cargo.lock') }}
+      - run: cargo check
+
+  geyser:
+    name: Geyser plugin (cargo check)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-indexer/geyser-plugin
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            qietr-indexer/geyser-plugin/target
+          key: ${{ runner.os }}-cargo-geyser-${{ hashFiles('qietr-indexer/geyser-plugin/Cargo.lock') }}
+      - run: cargo check

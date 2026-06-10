@@ -1,0 +1,26 @@
+# Local development stack for the indexer.
+# Geyser plugin runs inside the validator binary, not in Docker. The compose
+# file just brings up Postgres for the API and provides hints for the
+# validator command in comments.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: qietr
+      POSTGRES_PASSWORD: qietr
+      POSTGRES_DB: qietr_indexer
+    ports:
+      - "5432:5432"
+    volumes:
+      - qietr_pg_data:/var/lib/postgresql/data
+
+# Once the Geyser plugin is built (`cd geyser-plugin && cargo build --release`)
+# run the local validator like:
+#
+#   solana-test-validator \
+#     --geyser-plugin-config geyser-plugin/config.json \
+#     --bpf-program <pool-program-id> ../qietr-pool/target/deploy/qietr_pool.so
+
+volumes:
+  qietr_pg_data:

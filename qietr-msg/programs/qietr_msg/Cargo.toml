@@ -1,0 +1,23 @@
+[package]
+name = "qietr_msg"
+version = "0.1.0-alpha"
+authors = ["Qietr Protocol"]
+description = "Qietr encrypted agent messaging program"
+edition = "2021"
+license = "MIT"
+publish = false
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "qietr_msg"
+
+[features]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+cpi = ["no-entrypoint"]
+default = []
+idl-build = ["anchor-lang/idl-build"]
+
+[dependencies]
+anchor-lang = { version = "0.31.1", features = ["init-if-needed"] }

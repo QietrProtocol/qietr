@@ -1,0 +1,20 @@
+node_modules/
+dist/
+*.tsbuildinfo
+
+.env
+.env.*
+!.env.example
+
+# Real sanctions list never lives in the repo. The .example.txt placeholder
+# is the only thing committed under data/.
+/data/*
+!/data/sanctions.example.txt
+
+# Fee-payer keypair lives in an HSM in prod; ban any local keypair files
+# from being committed by accident.
+*.keypair.json
+*-keypair.json
+
+.DS_Store
+Thumbs.db

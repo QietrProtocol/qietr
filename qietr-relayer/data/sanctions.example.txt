@@ -1,0 +1,9 @@
+# qietr-relayer sanctions list — example placeholder.
+#
+# Lines beginning with '#' are comments; blank lines ignored.
+# Each non-comment line is a base58 Solana pubkey whose ATAs we will
+# refuse to relay payments to. The real list source is configured via
+# the SANCTIONS_LIST env var and is NOT committed to the repo.
+#
+# This file is committed only so the example loader has something to
+# parse without erroring out in dev. Empty by intent.

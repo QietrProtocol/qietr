@@ -1,0 +1,335 @@
+/* =============================================================================
+ * globals.css — design tokens from docs/05-uiux.md section 2.
+ *
+ * Light theme only. No dark default, no gradients, no glows.
+ * ============================================================================= */
+
+:root {
+  /* Color (section 2.1) */
+  --surface-0: #FFFFFF;
+  --surface-1: #F7F7F5;
+  --surface-2: #EDEDE8;
+  --border-subtle: #E2E2DC;
+  --border-strong: #1A1A1A;
+  --text-primary: #0E0E0C;
+  --text-secondary: #5B5B57;
+  --text-inverse: #F7F7F5;
+  --accent: #1A1A1A;
+  --accent-pressed: #000000;
+  --success: #2E7D4A;
+  --warning: #7A5A00;
+  --danger: #9B1D1D;
+
+  /* Typography (section 2.2) */
+  --font-display: "Inter Tight", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Spacing (section 2.3) — 8pt grid */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-24: 96px;
+
+  /* Radii (section 2.4) */
+  --radius-base: 8px;
+  --radius-pill: 999px;
+
+  /* Motion (section 2.6) */
+  --duration-hover: 120ms;
+  --easing-out: ease-out;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-weight: 400;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+code, pre, kbd, samp {
+  font-family: var(--font-mono);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color var(--duration-hover) var(--easing-out);
+}
+
+a:hover {
+  color: var(--accent-pressed);
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
+button {
+  font-family: inherit;
+}
+
+/* =============================================================================
+ * Wallet adapter overrides — match Qietr design tokens (docs/05-uiux.md §2)
+ *
+ * Replaces the default purple-on-dark theme with our light, monochrome palette.
+ * ============================================================================= */
+
+/* -- Button (trigger / connected) -- */
+.wallet-adapter-button {
+  height: 40px;
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  border-radius: var(--radius-base);
+  color: var(--text-primary);
+  background: transparent;
+  padding: 0 var(--space-4);
+  transition: background var(--duration-hover) var(--easing-out),
+              color var(--duration-hover) var(--easing-out);
+  line-height: 40px;
+}
+
+.wallet-adapter-button-trigger {
+  background: var(--accent);
+  color: var(--text-inverse);
+}
+
+.wallet-adapter-button:not([disabled]):hover {
+  background: var(--accent-pressed);
+  color: var(--text-inverse);
+}
+
+.wallet-adapter-button:not([disabled]):focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: 2px;
+}
+
+.wallet-adapter-button[disabled] {
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.wallet-adapter-button-end-icon,
+.wallet-adapter-button-start-icon,
+.wallet-adapter-button-end-icon img,
+.wallet-adapter-button-start-icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.wallet-adapter-button-end-icon {
+  margin-left: var(--space-2);
+}
+
+.wallet-adapter-button-start-icon {
+  margin-right: var(--space-2);
+}
+
+/* -- Dropdown (connected state) -- */
+.wallet-adapter-dropdown-list {
+  background: var(--surface-0);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-base);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  padding: var(--space-1);
+  grid-row-gap: 0;
+  font-family: var(--font-body);
+  top: calc(100% + var(--space-2));
+  right: 0;
+  min-width: 180px;
+}
+
+.wallet-adapter-dropdown-list-item {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: transparent;
+  border-radius: var(--radius-base);
+  height: 36px;
+  padding: 0 var(--space-3);
+  justify-content: flex-start;
+  transition: background var(--duration-hover) var(--easing-out);
+}
+
+.wallet-adapter-dropdown-list-item:not([disabled]):hover {
+  background: var(--surface-1);
+  color: var(--text-primary);
+}
+
+.wallet-adapter-dropdown-list-item:not([disabled]):focus-visible {
+  outline: 2px solid var(--border-strong);
+  outline-offset: -2px;
+}
+
+/* -- Modal backdrop -- */
+.wallet-adapter-modal {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+.wallet-adapter-modal-overlay {
+  background: transparent;
+}
+
+/* -- Modal wrapper -- */
+.wallet-adapter-modal-wrapper {
+  background: var(--surface-0);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-base);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  font-family: var(--font-body);
+  max-width: 380px;
+}
+
+.wallet-adapter-modal-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.125rem;
+  line-height: 1.4;
+  color: var(--text-primary);
+  padding: var(--space-8) var(--space-6) var(--space-4);
+}
+
+/* -- Close button -- */
+.wallet-adapter-modal-button-close {
+  background: var(--surface-1);
+  border-radius: var(--radius-base);
+  top: var(--space-4);
+  right: var(--space-4);
+  padding: var(--space-2);
+  width: 32px;
+  height: 32px;
+}
+
+.wallet-adapter-modal-button-close:hover {
+  background: var(--surface-2);
+}
+
+.wallet-adapter-modal-button-close svg {
+  fill: var(--text-secondary);
+  transition: fill var(--duration-hover) var(--easing-out);
+}
+
+.wallet-adapter-modal-button-close:hover svg {
+  fill: var(--text-primary);
+}
+
+/* -- Wallet list items -- */
+.wallet-adapter-modal-list {
+  margin: 0 0 var(--space-3);
+  padding: 0 var(--space-3);
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: transparent;
+  border-radius: var(--radius-base);
+  height: 52px;
+  line-height: 52px;
+  padding: 0 var(--space-3);
+  transition: background var(--duration-hover) var(--easing-out);
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button:not([disabled]):hover {
+  background: var(--surface-1);
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button-end-icon,
+.wallet-adapter-modal-list .wallet-adapter-button-start-icon,
+.wallet-adapter-modal-list .wallet-adapter-button-end-icon img,
+.wallet-adapter-modal-list .wallet-adapter-button-start-icon img {
+  width: 28px;
+  height: 28px;
+}
+
+.wallet-adapter-modal-list .wallet-adapter-button span {
+  margin-left: auto;
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  opacity: 1;
+}
+
+/* -- "More wallets" toggle -- */
+.wallet-adapter-modal-list-more {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  padding: var(--space-3) var(--space-4);
+  align-self: flex-start;
+  transition: color var(--duration-hover) var(--easing-out);
+}
+
+.wallet-adapter-modal-list-more:hover {
+  color: var(--text-primary);
+}
+
+.wallet-adapter-modal-list-more svg {
+  fill: var(--text-secondary);
+  margin-left: var(--space-2);
+}
+
+/* -- Middle area (no-wallets state) -- */
+.wallet-adapter-modal-middle {
+  padding: 0 var(--space-6) var(--space-6);
+}
+
+.wallet-adapter-modal-middle-button {
+  font-family: var(--font-body);
+  font-size: 0.9375rem;
+  font-weight: 500;
+  background: var(--accent);
+  color: var(--text-inverse);
+  border: none;
+  border-radius: var(--radius-base);
+  padding: var(--space-3) var(--space-6);
+  cursor: pointer;
+  margin-top: var(--space-8);
+  transition: background var(--duration-hover) var(--easing-out);
+}
+
+.wallet-adapter-modal-middle-button:hover {
+  background: var(--accent-pressed);
+}
+
+/* -- Collapse icon rotation -- */
+.wallet-adapter-modal-collapse-button svg {
+  fill: var(--text-secondary);
+}
+
+.wallet-adapter-modal-collapse-button.wallet-adapter-modal-collapse-button-active svg {
+  transform: rotate(180deg);
+  transition: transform ease-in 150ms;
+}

@@ -1,0 +1,58 @@
+{
+  "name": "@qietr/sdk",
+  "version": "0.1.0-alpha",
+  "description": "TypeScript SDK for the Qietr shielded payments protocol.",
+  "author": "Qietr Protocol",
+  "license": "MIT",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./note": {
+      "types": "./dist/note.d.ts",
+      "import": "./dist/note.js"
+    },
+    "./merkle": {
+      "types": "./dist/merkle.d.ts",
+      "import": "./dist/merkle.js"
+    },
+    "./prover": {
+      "types": "./dist/prover.d.ts",
+      "import": "./dist/prover.js"
+    },
+    "./pubkey": {
+      "types": "./dist/pubkey.d.ts",
+      "import": "./dist/pubkey.js"
+    },
+    "./types": {
+      "types": "./dist/types.d.ts",
+      "import": "./dist/types.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --test-timeout=600000 \"test/**/*.test.mjs\""
+  },
+  "dependencies": {
+    "@noble/hashes": "^1.5.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "@types/node": "^20.14.0",
+    "circomlibjs": "^0.1.7",
+    "snarkjs": "^0.7.4"
+  },
+  "peerDependencies": {
+    "@solana/web3.js": "^1.95.0"
+  }
+}

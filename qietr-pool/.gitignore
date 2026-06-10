@@ -1,0 +1,34 @@
+# Rust / Anchor build
+target/
+**/*.rs.bk
+Cargo.lock
+
+# Anchor
+.anchor/
+test-ledger/
+.DS_Store
+
+# Node (for anchor test runner)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Keys / wallets — never commit
+*.json
+!Anchor.toml
+!package.json
+!tsconfig.json
+!Cargo.toml
+keypairs/
+wallet.json
+id.json
+
+# IDE / OS
+.vscode/
+.idea/
+Thumbs.db
+
+# Env
+.env
+.env.local
