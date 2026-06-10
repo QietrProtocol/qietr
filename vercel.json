@@ -1,4 +1,5 @@
 {
-  "installCommand": "cd qietr-sdk && npm install && npm run build && cd ../qietr-web && npm install",
-  "framework": "nextjs"
+  "installCommand": "cd ../qietr-sdk && npm install && npm run build && cd ../qietr-web && npm install",
+  "framework": "nextjs",
+  "rootDirectory": "qietr-web"
 }
