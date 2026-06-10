@@ -2,7 +2,7 @@ node_modules
 dist
 .git
 .github
-docs
+/docs
 prxvt-data
 *.md
 IMPLEMENTATION_PLAN.md
