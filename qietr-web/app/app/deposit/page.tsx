@@ -17,9 +17,10 @@ export default function DepositPage() {
       </p>
 
       <Banner tone="warning">
-        The on-chain pool is not deployed yet. This screen is UI-complete but
-        cannot submit a real deposit. The wallet flow lands once
-        <code> anchor build</code> is unblocked and the pool ships to devnet.
+        The pool program is live on Solana devnet. This hosted UI is a preview
+        and needs a configured indexer and prover to submit a real deposit — run
+        it locally with those set, or use the SDK directly. Devnet only; not
+        audited.
       </Banner>
 
       <div style={{ height: "var(--space-6)" }} />

@@ -16,9 +16,9 @@ export default function PayPage() {
       </p>
 
       <Banner tone="warning">
-        The on-chain pool is not deployed yet. Both forms below validate input
-        and walk the UX, but the primary action is disabled until the pool
-        ships to devnet.
+        The pool program is live on Solana devnet. Both forms validate input and
+        walk the UX; submitting a real payment needs a configured indexer and
+        prover (run locally or use the SDK). Devnet only; not audited.
       </Banner>
 
       <div style={{ height: "var(--space-6)" }} />

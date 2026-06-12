@@ -18,8 +18,9 @@ export default function MessagingPage() {
       </p>
 
       <Banner tone="warning">
-        The qietr-msg program is not deployed yet. This screen is UI-complete
-        but cannot send real messages until the program ships to devnet.
+        The qietr-msg program is live on Solana devnet. This hosted screen is a
+        preview; sending real messages works from the SDK or a locally-configured
+        build. Devnet only; not audited.
       </Banner>
 
       <div style={{ height: "var(--space-6)" }} />

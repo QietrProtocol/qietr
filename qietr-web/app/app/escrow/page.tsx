@@ -18,9 +18,9 @@ export default function EscrowPage() {
       </p>
 
       <Banner tone="warning">
-        The qietr-escrow program is not deployed yet. This screen is
-        UI-complete but cannot create real escrows until the program ships to
-        devnet.
+        The qietr-escrow program is live on Solana devnet. This hosted screen is
+        a preview; creating real escrows works from the SDK or a locally-configured
+        build. Devnet only; not audited.
       </Banner>
 
       <div style={{ height: "var(--space-6)" }} />

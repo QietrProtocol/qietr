@@ -25,9 +25,9 @@ export default function NotePage() {
         borderRadius: "var(--radius-base)",
         padding: "var(--space-3) var(--space-4)",
       }}>
-        The on-chain pool is not deployed yet. You can create, back up, and
-        restore notes today — the format is forward-compatible — but the
-        commitments inside any note created right now are not spendable.
+        The pool program is live on Solana devnet. You can create, back up, and
+        restore notes here; spending the commitments inside them requires a
+        configured indexer and prover (SDK or local build). Devnet only.
       </p>
 
       <NoteManager />

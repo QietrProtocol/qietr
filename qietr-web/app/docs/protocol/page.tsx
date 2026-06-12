@@ -106,30 +106,48 @@ export default function ProtocolPage() {
         <h2 id="contracts" style={{ fontSize: "1.375rem", marginBottom: "var(--space-3)" }}>
           Smart contracts
         </h2>
-        <div style={{ overflowX: "auto", marginBottom: "var(--space-8)" }}>
+        <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-4)" }}>
+          All three programs are deployed and verified on Solana <strong>devnet</strong>.
+          Upgrade authority: <code style={{ wordBreak: "break-all" }}>GWxyJs7G9FPUY58UTtUSpVwFuXTRdXzneyBcekxmvuR4</code>.
+        </p>
+        <div style={{ overflowX: "auto", marginBottom: "var(--space-4)" }}>
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.9375rem" }}>
             <thead>
               <tr>
                 <th style={{ textAlign: "left", padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)", fontWeight: 600 }}>Program</th>
+                <th style={{ textAlign: "left", padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)", fontWeight: 600 }}>Program ID (devnet)</th>
                 <th style={{ textAlign: "left", padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)", fontWeight: 600 }}>Description</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td style={{ padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)", fontFamily: "var(--font-mono)", fontSize: "0.875rem" }}>qietr-pool</td>
+                <td style={{ padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)", fontFamily: "var(--font-mono)", fontSize: "0.8125rem" }}>
+                  <a href="https://explorer.solana.com/address/4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib?cluster=devnet" style={{ wordBreak: "break-all" }}>4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib</a>
+                </td>
                 <td style={{ padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>Shielded pool: deposit, withdraw, denomination management</td>
               </tr>
               <tr>
                 <td style={{ padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)", fontFamily: "var(--font-mono)", fontSize: "0.875rem" }}>qietr-escrow</td>
+                <td style={{ padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)", fontFamily: "var(--font-mono)", fontSize: "0.8125rem" }}>
+                  <a href="https://explorer.solana.com/address/DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz?cluster=devnet" style={{ wordBreak: "break-all" }}>DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz</a>
+                </td>
                 <td style={{ padding: "var(--space-3) var(--space-4)", borderBottom: "1px solid var(--border-subtle)", color: "var(--text-secondary)" }}>Trust-minimized agent commerce escrow</td>
               </tr>
               <tr>
                 <td style={{ padding: "var(--space-3) var(--space-4)", fontFamily: "var(--font-mono)", fontSize: "0.875rem" }}>qietr-msg</td>
+                <td style={{ padding: "var(--space-3) var(--space-4)", fontFamily: "var(--font-mono)", fontSize: "0.8125rem" }}>
+                  <a href="https://explorer.solana.com/address/6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez?cluster=devnet" style={{ wordBreak: "break-all" }}>6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez</a>
+                </td>
                 <td style={{ padding: "var(--space-3) var(--space-4)", color: "var(--text-secondary)" }}>Encrypted on-chain agent messaging</td>
               </tr>
             </tbody>
           </table>
         </div>
+        <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "var(--space-8)" }}>
+          Devnet USDC mint: <code style={{ wordBreak: "break-all" }}>4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU</code>.
+          The <code>$QIET</code> token is not minted yet. Not deployed to mainnet; unaudited.
+        </p>
 
         <h2 id="sdk" style={{ fontSize: "1.375rem", marginBottom: "var(--space-3)" }}>
           TypeScript SDK

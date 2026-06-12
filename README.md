@@ -107,13 +107,23 @@ All three on-chain programs are **deployed and verified on Solana devnet**.
 End-to-end flows — deposit, Groth16 withdraw, escrow lifecycle, and encrypted
 messaging — have been exercised against the live programs.
 
-| Program | Devnet program ID |
-|---|---|
-| `qietr_pool` | `4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib` |
-| `qietr_escrow` | `DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz` |
-| `qietr_msg` | `6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez` |
+### Programs (Solana devnet)
 
-Verify with `solana program show <ID> -u devnet`.
+| Program | Program ID | Explorer |
+|---|---|---|
+| `qietr_pool` | `4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib` | [view](https://explorer.solana.com/address/4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib?cluster=devnet) |
+| `qietr_escrow` | `DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz` | [view](https://explorer.solana.com/address/DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz?cluster=devnet) |
+| `qietr_msg` | `6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez` | [view](https://explorer.solana.com/address/6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez?cluster=devnet) |
+
+### Supporting addresses
+
+| Role | Address |
+|---|---|
+| Upgrade authority (all 3 programs) | `GWxyJs7G9FPUY58UTtUSpVwFuXTRdXzneyBcekxmvuR4` |
+| USDC mint (devnet) | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
+| `$QIET` token mint | _not minted yet_ |
+
+Verify any program with `solana program show <ID> -u devnet`.
 
 **Not yet done** (and not claimed):
 
