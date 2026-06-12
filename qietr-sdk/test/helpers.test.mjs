@@ -6,8 +6,10 @@ import {
   getCommitmentCount,
   getLargestCommitment,
   parseUSDCAmount,
-  formatUSDCAmount,
 } from "../dist/helpers.js";
+// formatUSDCAmount moved to errors.ts (used in InsufficientBalanceError) and is
+// re-exported from the package index.
+import { formatUSDCAmount } from "../dist/errors.js";
 
 const dummyCommitments = [
   { secret: "1", nullifier: "1", amount: 10_000_000, denomId: 0 },
@@ -56,9 +58,10 @@ describe("helpers", () => {
   });
 
   it("formatUSDCAmount formats correctly", () => {
-    assert.strictEqual(formatUSDCAmount(10_000_000), "10.000000");
-    assert.strictEqual(formatUSDCAmount(0), "0.000000");
-    assert.strictEqual(formatUSDCAmount(1_234_567), "1.234567");
+    // Canonical formatter (errors.ts) renders USD-style, 2 decimals.
+    assert.strictEqual(formatUSDCAmount(10_000_000), "10.00");
+    assert.strictEqual(formatUSDCAmount(0), "0.00");
+    assert.strictEqual(formatUSDCAmount(1_234_567), "1.23");
   });
 
   it("parseUSDCAmount parses valid strings", () => {

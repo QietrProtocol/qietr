@@ -41,27 +41,30 @@ describe("findJobPda / findEscrowVaultPda", () => {
 describe("buildCreateJobIx", () => {
   it("builds a valid instruction", async () => {
     const { buildCreateJobIx, QIETR_ESCROW_PROGRAM_ID } = await import("../dist/escrow.js");
+    const agent = Keypair.generate().publicKey;
     const client = Keypair.generate().publicKey;
     const clientAta = Keypair.generate().publicKey;
     const mint = Keypair.generate().publicKey;
     const nonce = new Uint8Array(8).fill(0xaa);
     const priceMicro = BigInt(1_000_000);
 
-    const ix = buildCreateJobIx(nonce, priceMicro, client, clientAta, mint);
+    const ix = buildCreateJobIx(agent, nonce, priceMicro, client, clientAta, mint);
     assert.equal(ix.programId.toBase58(), QIETR_ESCROW_PROGRAM_ID.toBase58());
-    // 6 account keys: job, vault, clientAta, client, mint, systemProgram, tokenProgram, rent
+    // 8 account keys: job, vault, clientAta, client, mint, systemProgram, tokenProgram, rent
     assert.equal(ix.keys.length, 8);
     assert.equal(ix.keys[3].pubkey.toBase58(), client.toBase58());
     assert.equal(ix.keys[3].isSigner, true);
-    // data: disc(8) + nonce(8) + priceMicro(8) = 24
-    assert.equal(ix.data.length, 24);
+    // data: disc(8) + agent(32) + nonce(8) + priceMicro(8) = 56
+    assert.equal(ix.data.length, 56);
+    // agent pubkey is encoded right after the discriminator
+    assert.deepEqual(Uint8Array.from(ix.data.slice(8, 40)), agent.toBytes());
   });
 
   it("rejects bad nonce length", async () => {
     const { buildCreateJobIx } = await import("../dist/escrow.js");
     const pk = Keypair.generate().publicKey;
     assert.throws(
-      () => buildCreateJobIx(new Uint8Array(4), BigInt(0), pk, pk, pk),
+      () => buildCreateJobIx(pk, new Uint8Array(4), BigInt(0), pk, pk, pk),
       /nonce must be 8 bytes/,
     );
   });
@@ -126,6 +129,60 @@ describe("accept / complete / release / dispute / refund instructions", () => {
   });
 });
 
+describe("cancel / resolve / close instructions (hardening)", () => {
+  it("buildCancelJobIx uses the cancel_job discriminator", async () => {
+    const { buildCancelJobIx } = await import("../dist/escrow.js");
+    const { sha256 } = await import("@noble/hashes/sha256");
+    const jobPda = Keypair.generate().publicKey;
+    const vault = Keypair.generate().publicKey;
+    const clientAta = Keypair.generate().publicKey;
+    const client = Keypair.generate().publicKey;
+    const ix = buildCancelJobIx(jobPda, vault, clientAta, client);
+    assert.equal(ix.keys.length, 5);
+    assert.equal(ix.keys[3].pubkey.toBase58(), client.toBase58());
+    assert.equal(ix.keys[3].isSigner, true);
+    const disc = sha256(new TextEncoder().encode("global:cancel_job")).slice(0, 8);
+    assert.deepEqual(Uint8Array.from(ix.data), disc);
+  });
+
+  it("buildRefundJobIx is an alias for cancel_job (same discriminator)", async () => {
+    const { buildRefundJobIx, buildCancelJobIx } = await import("../dist/escrow.js");
+    const a = [Keypair.generate().publicKey, Keypair.generate().publicKey,
+      Keypair.generate().publicKey, Keypair.generate().publicKey];
+    const refund = buildRefundJobIx(...a);
+    const cancel = buildCancelJobIx(...a);
+    assert.deepEqual(Uint8Array.from(refund.data), Uint8Array.from(cancel.data));
+  });
+
+  it("buildResolveDisputeIx is permissionless (no signer) and uses its discriminator", async () => {
+    const { buildResolveDisputeIx } = await import("../dist/escrow.js");
+    const { sha256 } = await import("@noble/hashes/sha256");
+    const jobPda = Keypair.generate().publicKey;
+    const vault = Keypair.generate().publicKey;
+    const clientAta = Keypair.generate().publicKey;
+    const ix = buildResolveDisputeIx(jobPda, vault, clientAta);
+    // no client signer required — anyone can trigger timeout resolution
+    assert.equal(ix.keys.length, 4);
+    assert.ok(ix.keys.every((k) => !k.isSigner), "resolve_dispute keys must not require a signer");
+    const disc = sha256(new TextEncoder().encode("global:resolve_dispute")).slice(0, 8);
+    assert.deepEqual(Uint8Array.from(ix.data), disc);
+  });
+
+  it("buildCloseJobIx sends rent to the claimant signer", async () => {
+    const { buildCloseJobIx } = await import("../dist/escrow.js");
+    const { sha256 } = await import("@noble/hashes/sha256");
+    const jobPda = Keypair.generate().publicKey;
+    const claimant = Keypair.generate().publicKey;
+    const ix = buildCloseJobIx(jobPda, claimant);
+    assert.equal(ix.keys.length, 2);
+    assert.equal(ix.keys[0].pubkey.toBase58(), jobPda.toBase58());
+    assert.equal(ix.keys[1].pubkey.toBase58(), claimant.toBase58());
+    assert.equal(ix.keys[1].isSigner, true);
+    const disc = sha256(new TextEncoder().encode("global:close_job")).slice(0, 8);
+    assert.deepEqual(Uint8Array.from(ix.data), disc);
+  });
+});
+
 describe("parseJobAccount", () => {
   it("parses a valid job account", async () => {
     const { parseJobAccount, findJobPda, JOB_ACCOUNT_SIZE, JobState } = await import("../dist/escrow.js");
@@ -145,6 +202,7 @@ describe("parseJobAccount", () => {
     new DataView(data.buffer).setBigInt64(off, BigInt(1000), true); off += 8; // createdAt
     new DataView(data.buffer).setBigInt64(off, BigInt(2000), true); off += 8; // acceptedAt
     new DataView(data.buffer).setBigInt64(off, BigInt(3000), true); off += 8; // completedAt
+    new DataView(data.buffer).setBigInt64(off, BigInt(4000), true); off += 8; // resolvedAt
     data[off] = JobState.Created; off += 1;
     data[off] = 0xff; off += 1; // bump
     data[off] = 0xfe; // escrowBump
@@ -157,6 +215,7 @@ describe("parseJobAccount", () => {
     assert.equal(parsed.createdAt, 1000);
     assert.equal(parsed.acceptedAt, 2000);
     assert.equal(parsed.completedAt, 3000);
+    assert.equal(parsed.resolvedAt, 4000);
     assert.equal(parsed.state, JobState.Created);
     assert.equal(parsed.bump, 0xff);
     assert.equal(parsed.escrowBump, 0xfe);

@@ -25,7 +25,12 @@ export class RelayerClient {
   }
 
   private async get<T>(path: string): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`);
+    let res: Response;
+    try {
+      res = await fetch(`${this.baseUrl}${path}`);
+    } catch (e) {
+      throw new NetworkError(`relayer GET ${path} failed: ${(e as Error).message}`);
+    }
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       throw new NetworkError(`relayer GET ${path} returned ${res.status}: ${body}`);
@@ -34,11 +39,16 @@ export class RelayerClient {
   }
 
   private async post<T>(path: string, body: unknown): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(body),
-    });
+    let res: Response;
+    try {
+      res = await fetch(`${this.baseUrl}${path}`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      throw new NetworkError(`relayer POST ${path} failed: ${(e as Error).message}`);
+    }
     if (!res.ok) {
       const text = await res.text().catch(() => "");
       throw new RelayerError(`relayer POST ${path} returned ${res.status}: ${text}`);

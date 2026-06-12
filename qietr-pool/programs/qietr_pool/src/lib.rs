@@ -50,6 +50,7 @@ pub mod qietr_pool {
 
     // ------------------------------------------------------------------------
     pub fn initialize_pool(ctx: Context<InitializePool>, fee_bps: u16) -> Result<()> {
+        require!(fee_bps <= 10000, QietrError::FeeBpsTooHigh);
         let cfg = &mut ctx.accounts.config;
         cfg.admin = ctx.accounts.admin.key();
         cfg.fee_bps = fee_bps;
@@ -236,7 +237,7 @@ pub mod qietr_pool {
                 .ok_or(QietrError::FeeVaultNotSet)?;
             require!(
                 fee_vault_acct.key() == fee_vault_pk,
-                QietrError::FeeVaultNotSet
+                QietrError::FeeVaultMismatch
             );
 
             // Transfer net amount to recipient.
@@ -412,13 +413,13 @@ pub struct InitializeDenomination<'info> {
 #[instruction(denom_id: u8)]
 pub struct Deposit<'info> {
     #[account(seeds = [b"config"], bump = config.bump)]
-    pub config: Account<'info, PoolConfig>,
+    pub config: Box<Account<'info, PoolConfig>>,
     #[account(
         mut,
         seeds = [b"denom", denom_id.to_le_bytes().as_ref()],
         bump = denomination.bump,
     )]
-    pub denomination: Account<'info, Denomination>,
+    pub denomination: Box<Account<'info, Denomination>>,
     #[account(
         mut,
         seeds = [b"tree", denom_id.to_le_bytes().as_ref()],
@@ -447,12 +448,12 @@ pub struct Deposit<'info> {
 #[instruction(denom_id: u8, nullifier_hash: [u8; 32])]
 pub struct Withdraw<'info> {
     #[account(seeds = [b"config"], bump = config.bump)]
-    pub config: Account<'info, PoolConfig>,
+    pub config: Box<Account<'info, PoolConfig>>,
     #[account(
         seeds = [b"denom", denom_id.to_le_bytes().as_ref()],
         bump = denomination.bump,
     )]
-    pub denomination: Account<'info, Denomination>,
+    pub denomination: Box<Account<'info, Denomination>>,
     #[account(
         mut,
         seeds = [b"tree", denom_id.to_le_bytes().as_ref()],
@@ -481,7 +482,7 @@ pub struct Withdraw<'info> {
     pub recipient_ata: Box<Account<'info, TokenAccount>>,
     /// CHECK: validated in withdraw body; only used when config.fee_vault != default.
     #[account(mut)]
-    pub fee_vault: Option<Account<'info, TokenAccount>>,
+    pub fee_vault: Option<Box<Account<'info, TokenAccount>>>,
     #[account(mut)]
     pub fee_payer: Signer<'info>,
     pub token_program: Program<'info, Token>,

@@ -1,10 +1,5 @@
+import { USDC_DECIMALS } from "./chain.js";
 import type { Commitment, Note } from "./types.js";
-
-export const USDC_DECIMALS = 6;
-
-export function formatUSDCAmount(microAmount: number | bigint): string {
-  return (Number(microAmount) / 10 ** USDC_DECIMALS).toFixed(USDC_DECIMALS);
-}
 
 export function parseUSDCAmount(amountStr: string): number {
   const clean = amountStr.replace(/[$,]/g, "");

@@ -85,6 +85,23 @@ export function buildDeleteMsgIx(
   });
 }
 
+export function buildCloseMsgIx(
+  msgPda: PublicKey,
+  recipient: PublicKey,
+  programId: PublicKey = QIETR_MSG_PROGRAM_ID,
+): TransactionInstruction {
+  const disc = anchorDiscriminator("close");
+
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: msgPda, isSigner: false, isWritable: true },
+      { pubkey: recipient, isSigner: true, isWritable: true },
+    ],
+    data: Buffer.from(disc),
+  });
+}
+
 // ---------------------------------------------------------------------------
 // PDA derivation
 // ---------------------------------------------------------------------------
@@ -201,8 +218,14 @@ export function parseMessageAccount(data: Uint8Array): EncryptedMessage | null {
   const bodyLen = buf.readUInt16LE(88);
   const body = data.slice(91, 91 + bodyLen);
 
+  const nonce = data.slice(72, 80);
+  const pda = PublicKey.findProgramAddressSync(
+    [Buffer.from("msg"), new PublicKey(data.slice(8, 40)).toBytes(), new PublicKey(data.slice(40, 72)).toBytes(), nonce],
+    QIETR_MSG_PROGRAM_ID,
+  )[0].toBase58();
+
   return {
-    pda: "",
+    pda,
     from,
     to,
     timestamp,

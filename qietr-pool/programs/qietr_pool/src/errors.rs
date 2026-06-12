@@ -36,4 +36,8 @@ pub enum QietrError {
     HashFailure,
     #[msg("Fee vault is not configured")]
     FeeVaultNotSet,
+    #[msg("Fee vault account does not match the configured fee vault")]
+    FeeVaultMismatch,
+    #[msg("Fee basis points must be <= 10000")]
+    FeeBpsTooHigh,
 }

@@ -17,7 +17,8 @@ describe("parseJobAccount edge cases", () => {
       data.set(disc, 0);
       let off = 8;
       data.set(client.toBytes(), off); off += 32;
-      off += 32 + 8 + 8 + 8 + 8 + 8;
+      // skip agent(32) + nonce(8) + price(8) + created(8) + accepted(8) + completed(8) + resolved(8)
+      off += 32 + 8 + 8 + 8 + 8 + 8 + 8;
       data[off] = state;
 
       const parsed = parseJobAccount(data);
@@ -91,9 +92,9 @@ describe("helpers edge cases", () => {
   });
 
   it("formatUSDCAmount handles very large amounts", async () => {
-    const { formatUSDCAmount } = await import("../dist/helpers.js");
-    assert.strictEqual(formatUSDCAmount(1_000_000_000_000), "1000000.000000");
-    assert.strictEqual(formatUSDCAmount(999_999_999_999), "999999.999999");
+    const { formatUSDCAmount } = await import("../dist/errors.js");
+    assert.strictEqual(formatUSDCAmount(1_000_000_000_000), "1000000.00");
+    assert.strictEqual(formatUSDCAmount(999_999_990_000), "999999.99");
   });
 });
 

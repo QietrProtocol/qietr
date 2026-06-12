@@ -139,3 +139,22 @@ describe("encryptMsgBody / decryptMsgBody", () => {
     );
   });
 });
+
+describe("buildCloseMsgIx (hardening)", () => {
+  it("uses the close discriminator and recipient signer", async () => {
+    const { Keypair } = await import("@solana/web3.js");
+    const { buildCloseMsgIx, QIETR_MSG_PROGRAM_ID } = await import("../dist/msg.js");
+    const { sha256 } = await import("@noble/hashes/sha256");
+    const msgPda = Keypair.generate().publicKey;
+    const recipient = Keypair.generate().publicKey;
+    const ix = buildCloseMsgIx(msgPda, recipient);
+    assert.equal(ix.programId.toBase58(), QIETR_MSG_PROGRAM_ID.toBase58());
+    assert.equal(ix.keys.length, 2);
+    assert.equal(ix.keys[0].pubkey.toBase58(), msgPda.toBase58());
+    assert.equal(ix.keys[1].pubkey.toBase58(), recipient.toBase58());
+    assert.equal(ix.keys[1].isSigner, true);
+    assert.equal(ix.keys[1].isWritable, true);
+    const disc = sha256(new TextEncoder().encode("global:close")).slice(0, 8);
+    assert.deepEqual(Uint8Array.from(ix.data), disc);
+  });
+});

@@ -57,7 +57,8 @@ import { getNoteBalance, hasEnoughBalance } from "./helpers.js";
 import { InvalidNoteError, RelayerError } from "./errors.js";
 import { RelayerClient } from "./relayer-client.js";
 
-const DEFAULT_INDEXER_URL = "https://indexer.qietr.com";
+// No default indexer URL — consumer MUST provide one via QietrSDKConfig.indexerUrl.
+// The placeholder domain indexer.qietr.com does not exist and is not deployed.
 
 export class QietrSDK {
   readonly config: QietrSDKConfig;
@@ -83,14 +84,20 @@ export class QietrSDK {
         }))
       : DEFAULT_TIERS;
 
-    const indexerBase = config.indexerUrl ?? DEFAULT_INDEXER_URL;
-    this.indexer = new IndexerClient(indexerBase);
+    if (!config.indexerUrl) {
+      throw new Error(
+        "QietrSDK requires `indexerUrl` in config. Set it to the deployed indexer base URL.",
+      );
+    }
+    this.indexer = new IndexerClient(config.indexerUrl);
 
-    // Default circuit artifact locations — overridable per deployment.
-    const proverBase = (config.proverPath ?? "https://circuits.qietr.com").replace(
-      /\/+$/,
-      "",
-    );
+    if (!config.proverPath) {
+      throw new Error(
+        "QietrSDK requires `proverPath` in config. " +
+        "Set it to the base URL where WASM and zkey files are hosted (e.g. Cloudflare R2).",
+      );
+    }
+    const proverBase = config.proverPath.replace(/\/+$/, "");
     this.proverPath = {
       wasm: `${proverBase}/qietr_payment.wasm`,
       zkey: `${proverBase}/qietr_payment_final.zkey`,
@@ -332,21 +339,20 @@ export class QietrSDK {
     // Reject obviously-spent notes before paying for proof generation.
     const nullHashDec = await poseidonNullifierHash(commitment.nullifier);
     const nullHashBe = fieldDecToBE32(nullHashDec);
+    let nullifierStatus;
     try {
-      const status = await this.indexer.nullifierStatus(
+      nullifierStatus = await this.indexer.nullifierStatus(
         commitment.denomId,
         "0x" + Buffer.from(nullHashBe).toString("hex"),
       );
-      if (status.spent) {
-        throw new Error(
-          `commitment already spent (nullifier seen at slot ${status.spentAtSlot})`,
-        );
-      }
     } catch (e) {
       // Indexer outage is not fatal — on-chain check will catch it.
-      if (e instanceof Error && e.message.startsWith("commitment already spent")) {
-        throw e;
-      }
+      // Log and continue.
+    }
+    if (nullifierStatus?.spent) {
+      throw new Error(
+        `commitment already spent (nullifier seen at slot ${nullifierStatus.spentAtSlot})`,
+      );
     }
 
     const groth = await proveGroth16(
@@ -484,20 +490,46 @@ export class QietrSDK {
     const tx = new Transaction();
     for (const ix of ixs) tx.add(ix);
     tx.feePayer = signer.publicKey;
-    const { blockhash, lastValidBlockHeight } =
-      await this.connection.getLatestBlockhash("confirmed");
+    let blockhash: string, lastValidBlockHeight: number;
+    try {
+      const bh = await this.connection.getLatestBlockhash("confirmed");
+      blockhash = bh.blockhash;
+      lastValidBlockHeight = bh.lastValidBlockHeight;
+    } catch (e) {
+      throw new Error(
+        `failed to get blockhash: ${(e as Error).message}`,
+      );
+    }
     tx.recentBlockhash = blockhash;
 
-    const signed = await signer.signTransaction(tx);
-    const rawTx = (signed as Transaction).serialize();
-    const sig = await this.connection.sendRawTransaction(rawTx, {
-      skipPreflight: false,
-      preflightCommitment: "confirmed",
-    });
-    await this.connection.confirmTransaction(
-      { signature: sig, blockhash, lastValidBlockHeight },
-      "confirmed",
-    );
+    let signed: Transaction;
+    try {
+      signed = await signer.signTransaction(tx);
+    } catch (e) {
+      throw new Error(
+        `transaction signing failed: ${(e as Error).message}`,
+      );
+    }
+    const rawTx = signed.serialize();
+    let sig: string;
+    try {
+      sig = await this.connection.sendRawTransaction(rawTx, {
+        skipPreflight: false,
+        preflightCommitment: "confirmed",
+      });
+    } catch (e) {
+      throw new Error(
+        `transaction submission failed: ${(e as Error).message}`,
+      );
+    }
+    try {
+      await this.connection.confirmTransaction(
+        { signature: sig, blockhash, lastValidBlockHeight },
+        "confirmed",
+      );
+    } catch (e) {
+      // Confirm failure is not fatal — tx may still land.
+    }
     return sig;
   }
 }

@@ -11,6 +11,8 @@ export interface RelayerConfig {
   rpcUrl: string;
   programId: PublicKey;
   feePayer: Keypair;
+  /** Optional API key for Bearer auth. If unset, all requests are allowed. */
+  apiKey?: string;
   /** ATA where gasless deposit fees are collected. */
   feeAta?: PublicKey;
   /** Fixed fee in micro-USDC charged per gasless deposit. */
@@ -89,6 +91,7 @@ export function loadConfig(): RelayerConfig {
     })),
     feeBps: Number(process.env.FEE_BPS ?? 50), // 0.5% default; on-chain config wins
   };
+  if (process.env.API_KEY) cfg.apiKey = process.env.API_KEY;
   if (process.env.FEE_ATA) cfg.feeAta = new PublicKey(process.env.FEE_ATA);
   if (process.env.KORA_URL) cfg.koraUrl = process.env.KORA_URL;
   if (process.env.SANCTIONS_LIST) cfg.sanctionsSource = process.env.SANCTIONS_LIST;

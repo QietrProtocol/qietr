@@ -1,6 +1,18 @@
 # Session State — handoff notes
 
-**Last updated:** 2026-06-09 (Session 3: SDK helpers, gasless deposit, $QIET, qietr-msg, qietr-escrow, CI/CD)
+**Last updated:** 2026-06-12 (Session 4: hardening pass — escrow lifecycle, close instructions, pool guards, SDK error handling + required config, relayer auth)
+
+---
+
+## Session 4 — hardening pass (latest)
+
+- **Escrow** (`qietr-escrow`): `create_job` now takes `agent` + requires `price_micro > 0`; `accept_job` checks caller == pinned agent; `release_payment` asserts `agent_ata.owner == job.agent`; new `cancel_job` (refund pre-accept or after 7-day accept timeout), `resolve_dispute` (permissionless, after 7-day dispute timeout), `close_job` (rent reclaim via Anchor `close =`). `Job` gained `resolved_at`.
+- **Msg** (`qietr-msg`): new `close` instruction (recipient reclaims rent via Anchor `close =`).
+- **Pool** (`qietr-pool`): `fee_bps <= 10000` guard, `FeeVaultMismatch` error, `Box`-ed `Deposit`/`Withdraw` accounts.
+- **SDK**: `indexerUrl` + `proverPath` are now **required** (no placeholder defaults); all `fetch`/RPC wrapped in typed errors; x402 receipt uses real payer pubkey. New builders `buildCancelJobIx`, `buildResolveDisputeIx`, `buildCloseJobIx`, `buildCloseMsgIx` (+ `buildRefundJobIx` deprecated alias).
+- **Relayer**: Bearer auth (`src/policy/auth.ts`, `API_KEY` env) on all routes except `/health`; rate-limit now returns 429.
+- **Tests**: SDK **100/100** (fixed stale tests for new `create_job`/`parseJobAccount`/`formatUSDCAmount`; added 5 builder tests). Relayer **6/6** auth tests (new `node --test` + tsx runner; runs against `src/`).
+- ⚠️ **SDK tests run against `dist/`** — always `npm run build` before `npm test`.
 
 ---
 
@@ -104,9 +116,10 @@ In a fresh session at this directory:
 
 | Suite | Count |
 |-------|-------|
-| SDK tests | 95 pass (0 fail) |
+| SDK tests | 100 pass (0 fail) — run `npm run build` first |
+| Relayer auth tests | 6 pass |
 | Circuits tests | 6 pass |
 | Pool Rust tests | 5 pass (2 poseidon parity + 3 unit) |
 | Geyser plugin tests | 6 pass |
 | Pool anchor mocha | 10 tests (written, need `anchor build` to run) |
-| **Total** | **~122** |
+| **Total** | **~133** |

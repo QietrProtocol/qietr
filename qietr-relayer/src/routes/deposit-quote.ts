@@ -15,11 +15,17 @@ export async function depositQuoteRoute(
 ): Promise<void> {
   app.get("/deposit-quote", async (req, reply) => {
     const ip = req.ip ?? "unknown";
-    await deps.ipLimiter.check(
+    const ipDecision = await deps.ipLimiter.check(
       `deposit-quote:${ip}`,
       deps.config.rateIpWindowSeconds,
       deps.config.rateIpLimit,
     );
+    if (!ipDecision.allowed) {
+      return reply.code(429).send({
+        error: ipDecision.reason ?? "rate_limited",
+        retryAfterSeconds: ipDecision.retryAfterSeconds,
+      });
+    }
 
     const { blockhash, lastValidBlockHeight } =
       await deps.connection.getLatestBlockhash("confirmed");

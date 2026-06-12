@@ -18,6 +18,12 @@ export async function quoteRoute(
       deps.config.rateIpWindowSeconds,
       deps.config.rateIpLimit,
     );
+    if (!ipDecision.allowed) {
+      return reply.code(429).send({
+        error: ipDecision.reason ?? "rate_limited",
+        retryAfterSeconds: ipDecision.retryAfterSeconds,
+      });
+    }
 
     return reply.send({
       feePayer: deps.config.feePayer.publicKey.toBase58(),

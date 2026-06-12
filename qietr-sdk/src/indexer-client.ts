@@ -4,6 +4,8 @@
 // API shape mirrors qietr-indexer/api/src/routes/*.
 // =============================================================================
 
+import { NetworkError } from "./errors.js";
+
 export interface DenominationInfo {
   denomId: number;
   amountMicroUsdc: string;
@@ -53,9 +55,16 @@ export class IndexerClient {
   }
 
   private async getJson<T>(path: string): Promise<T> {
-    const res = await this.fetchImpl(`${this.baseUrl}${path}`, {
-      headers: { accept: "application/json" },
-    });
+    let res: Response;
+    try {
+      res = await this.fetchImpl(`${this.baseUrl}${path}`, {
+        headers: { accept: "application/json" },
+      });
+    } catch (e) {
+      throw new NetworkError(
+        `indexer GET ${path} failed: ${(e as Error).message}`,
+      );
+    }
     if (!res.ok) {
       const body = await res.text().catch(() => "");
       throw new IndexerError(res.status, body || res.statusText);

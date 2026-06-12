@@ -39,6 +39,12 @@ pub mod qietr_msg {
         msg.body = [0u8; MAX_MSG_BYTES];
         Ok(())
     }
+
+    pub fn close(_ctx: Context<Close>) -> Result<()> {
+        // Recipient-only is enforced by the `constraint` on Close; rent lamports
+        // are returned to the recipient by Anchor's `close = recipient` epilogue.
+        Ok(())
+    }
 }
 
 #[account]
@@ -84,6 +90,19 @@ pub struct Delete<'info> {
         seeds = [b"msg", message.from.as_ref(), message.to.as_ref(), &message.nonce],
         bump = message.bump,
         constraint = message.to == recipient.key() @ MsgError::NotRecipient,
+    )]
+    pub message: Account<'info, Message>,
+    pub recipient: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct Close<'info> {
+    #[account(
+        mut,
+        seeds = [b"msg", message.from.as_ref(), message.to.as_ref(), &message.nonce],
+        bump = message.bump,
+        constraint = message.to == recipient.key() @ MsgError::NotRecipient,
+        close = recipient,
     )]
     pub message: Account<'info, Message>,
     pub recipient: Signer<'info>,

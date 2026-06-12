@@ -73,8 +73,17 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked by
 
 ## Phase M — CI/CD
 
-- [ ] **M1.** GitHub Actions: `npm test` + `cargo test` on PR.
-- [ ] **M2.** `npm publish` automation for `@qietr/sdk`.
+- [x] **M1.** GitHub Actions: `npm test` + `cargo test` on PR. (`.github/workflows/ci.yml`, 9 jobs.)
+- [ ] **M2.** `npm publish` automation for `@qietr/sdk`. (Workflow `publish-sdk.yml` exists; needs npm token secret.)
+
+## Phase N — Hardening pass (production-readiness)
+
+- [x] **N1.** Escrow lifecycle: `cancel_job` (client refund pre-accept or after accept-timeout), `resolve_dispute` (permissionless timeout resolution), `close_job` (rent reclaim). `create_job` now pins `agent` up front and requires `price_micro > 0`. `release_payment` asserts `agent_ata.owner == job.agent`.
+- [x] **N2.** Msg `close` instruction (recipient reclaims rent). Both `close_job` and msg `close` use idiomatic Anchor `close =` (no manual lamports drain).
+- [x] **N3.** Pool: `fee_bps <= 10000` guard, distinct `FeeVaultMismatch` error, `Box`-ed accounts in `Deposit`/`Withdraw` to cut stack usage.
+- [x] **N4.** SDK: removed placeholder default URLs (`indexerUrl` + `proverPath` now required), wrapped all `fetch`/RPC calls in typed errors, real payer pubkey in x402 receipts. New builders: `buildCancelJobIx`, `buildResolveDisputeIx`, `buildCloseJobIx`, `buildCloseMsgIx` (+ `buildRefundJobIx` kept as deprecated alias).
+- [x] **N5.** Relayer: Bearer-token auth (`src/policy/auth.ts`, `API_KEY` env) on all routes except `/health`; rate-limit decisions now return 429.
+- [x] **N6.** Tests: SDK 100/100 (5 new builder tests + stale tests fixed for new signatures); relayer auth suite 6/6 (new `node --test` + tsx runner).
 
 ---
 
@@ -90,4 +99,8 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked by
 2. **User:** Phase B (toolchain upgrade). **DONE**
 3. **Session 2:** Phase C + D + E (pool tests, web, Geyser). **DONE**
 4. **Session 3:** Phase F + G + H (SDK helpers, gasless deposit, $QIET, qietr-msg, qietr-escrow). **DONE**
-5. **Remaining:** I1–I3 (devnet rollout — blocked on you), J1–J2 (mainnet), K1 (token), L1 (cross-chain), M1–M2 (CI/CD).
+5. **Session 4:** Phase N (hardening pass — escrow lifecycle, msg/job close, pool guards, SDK error handling + required config URLs, relayer auth). **DONE**
+6. **Remaining:** I1–I3 (devnet rollout — blocked on you), J1–J2 (mainnet), K1 (token), L1 (cross-chain), M2 (npm publish token).
+
+> **Gotcha:** `qietr-sdk` tests run against compiled `dist/`, not `src/`. Always `npm run build` before `npm test` or you will test stale code. The relayer tests run against `src/` via tsx, so no build step is needed there.
+

@@ -69,13 +69,13 @@ export {
   formatUSDCAmount,
 } from "./errors.js";
 export { Logger, type LogLevel } from "./logger.js";
-export { AttestorClient, type NullifierAttestation } from "./attestor-client.js";
 export { RelayerClient } from "./relayer-client.js";
 export {
   QIETR_MSG_PROGRAM_ID,
   MAX_MESSAGE_BYTES,
   buildSendMsgIx,
   buildDeleteMsgIx,
+  buildCloseMsgIx,
   findMsgPda,
   encryptMsgBody,
   decryptMsgBody,
@@ -101,6 +101,9 @@ export {
   buildReleasePaymentIx,
   buildDisputeJobIx,
   buildRefundJobIx,
+  buildCancelJobIx,
+  buildResolveDisputeIx,
+  buildCloseJobIx,
   findJobPda,
   findEscrowVaultPda,
   parseJobAccount,

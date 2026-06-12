@@ -5,6 +5,7 @@ import {
   SYSVAR_RENT_PUBKEY,
   TransactionInstruction,
 } from "@solana/web3.js";
+import { TOKEN_PROGRAM_ID } from "./program.js";
 
 export const QIETR_ESCROW_PROGRAM_ID = new PublicKey(
   "BqAeDVPRdokf5q5XQmHoanwEYgyNwV9xWjbUMGQJRmJE",
@@ -23,6 +24,7 @@ function anchorDiscriminator(name: string): Uint8Array {
 // ---------------------------------------------------------------------------
 
 export function buildCreateJobIx(
+  agent: PublicKey,
   nonce: Uint8Array,
   priceMicro: bigint,
   client: PublicKey,
@@ -35,11 +37,12 @@ export function buildCreateJobIx(
   }
 
   const disc = anchorDiscriminator("create_job");
-  const data = new Uint8Array(8 + 8 + 8);
+  const data = new Uint8Array(8 + 32 + 8 + 8);
   data.set(disc, 0);
-  data.set(nonce, 8);
+  data.set(agent.toBytes(), 8);
+  data.set(nonce, 40);
   const dv = new DataView(data.buffer);
-  dv.setBigUint64(16, priceMicro, true);
+  dv.setBigUint64(48, priceMicro, true);
 
   const [jobPda] = findJobPda(client, nonce, programId);
   const [vaultPda] = findEscrowVaultPda(client, nonce, programId);
@@ -125,7 +128,18 @@ export function buildDisputeJobIx(
   });
 }
 
+/** @deprecated Use buildCancelJobIx instead. */
 export function buildRefundJobIx(
+  jobPda: PublicKey,
+  escrowVault: PublicKey,
+  clientAta: PublicKey,
+  client: PublicKey,
+  programId: PublicKey = QIETR_ESCROW_PROGRAM_ID,
+): TransactionInstruction {
+  return buildCancelJobIx(jobPda, escrowVault, clientAta, client, programId);
+}
+
+export function buildCancelJobIx(
   jobPda: PublicKey,
   escrowVault: PublicKey,
   clientAta: PublicKey,
@@ -141,7 +155,40 @@ export function buildRefundJobIx(
       { pubkey: client, isSigner: true, isWritable: false },
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
     ],
-    data: Buffer.from(anchorDiscriminator("refund_job")),
+    data: Buffer.from(anchorDiscriminator("cancel_job")),
+  });
+}
+
+export function buildResolveDisputeIx(
+  jobPda: PublicKey,
+  escrowVault: PublicKey,
+  clientAta: PublicKey,
+  programId: PublicKey = QIETR_ESCROW_PROGRAM_ID,
+): TransactionInstruction {
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: jobPda, isSigner: false, isWritable: true },
+      { pubkey: escrowVault, isSigner: false, isWritable: true },
+      { pubkey: clientAta, isSigner: false, isWritable: true },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+    ],
+    data: Buffer.from(anchorDiscriminator("resolve_dispute")),
+  });
+}
+
+export function buildCloseJobIx(
+  jobPda: PublicKey,
+  claimant: PublicKey,
+  programId: PublicKey = QIETR_ESCROW_PROGRAM_ID,
+): TransactionInstruction {
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: jobPda, isSigner: false, isWritable: true },
+      { pubkey: claimant, isSigner: true, isWritable: true },
+    ],
+    data: Buffer.from(anchorDiscriminator("close_job")),
   });
 }
 
@@ -175,11 +222,7 @@ export function findEscrowVaultPda(
 // Constants
 // ---------------------------------------------------------------------------
 
-export const TOKEN_PROGRAM_ID = new PublicKey(
-  "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
-);
-
-export const JOB_ACCOUNT_SIZE = 8 + 32 + 32 + 8 + 8 + 8 + 8 + 8 + 1 + 1 + 1;
+export const JOB_ACCOUNT_SIZE = 8 + 32 + 32 + 8 + 8 + 8 + 8 + 8 + 8 + 1 + 1 + 1;
 
 export enum JobState {
   Created = 0,
@@ -198,13 +241,14 @@ export interface ParsedJob {
   createdAt: number;
   acceptedAt: number;
   completedAt: number;
+  resolvedAt: number;
   state: JobState;
   bump: number;
   escrowBump: number;
 }
 
 export function parseJobAccount(data: Uint8Array): ParsedJob | null {
-  const MIN_SIZE = 8 + 32 + 32 + 8 + 8 + 8 + 8 + 8 + 1 + 1 + 1;
+  const MIN_SIZE = 8 + 32 + 32 + 8 + 8 + 8 + 8 + 8 + 8 + 1 + 1 + 1;
   if (data.length < MIN_SIZE) return null;
 
   const expectedDisc = sha256(new TextEncoder().encode("account:Job")).slice(0, 8);
@@ -225,13 +269,14 @@ export function parseJobAccount(data: Uint8Array): ParsedJob | null {
   const createdAt = Number(buf.readBigInt64LE(off)); off += 8;
   const acceptedAt = Number(buf.readBigInt64LE(off)); off += 8;
   const completedAt = Number(buf.readBigInt64LE(off)); off += 8;
+  const resolvedAt = Number(buf.readBigInt64LE(off)); off += 8;
   const state = data[off]! as JobState; off += 1;
   const bump = data[off]!; off += 1;
   const escrowBump = data[off]!;
 
   return {
     client, agent, nonce, priceMicro,
-    createdAt, acceptedAt, completedAt,
+    createdAt, acceptedAt, completedAt, resolvedAt,
     state, bump, escrowBump,
   };
 }

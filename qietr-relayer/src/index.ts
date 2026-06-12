@@ -20,6 +20,7 @@ import {
   createSanctionsList,
   emptySanctionsList,
 } from "./policy/sanctions.js";
+import { requireAuth } from "./policy/auth.js";
 import { quoteRoute } from "./routes/quote.js";
 import { submitRoute } from "./routes/submit.js";
 import { depositQuoteRoute } from "./routes/deposit-quote.js";
@@ -66,29 +67,38 @@ async function main() {
     }, 3600 * 1000).unref();
   }
 
+  const auth = requireAuth(config.apiKey);
+
   app.get("/health", async () => {
     const koraOk = await kora.ping().catch(() => false);
     return { ok: koraOk, feePayer: config.feePayer.publicKey.toBase58() };
   });
 
-  await app.register((api) => quoteRoute(api, { config, ipLimiter }));
-  await app.register((api) =>
-    submitRoute(api, {
+  // All other routes require auth (if configured).
+  await app.register(async (api) => {
+    api.addHook("preHandler", auth);
+    await quoteRoute(api, { config, ipLimiter });
+  });
+  await app.register(async (api) => {
+    api.addHook("preHandler", auth);
+    await submitRoute(api, {
       config,
       kora,
       connection,
       ipLimiter,
       recipientLimiter,
       sanctions,
-    }),
-  );
+    });
+  });
 
-  await app.register((api) =>
-    depositQuoteRoute(api, { config, connection, ipLimiter }),
-  );
-  await app.register((api) =>
-    submitDepositRoute(api, { config, kora, ipLimiter, sanctions }),
-  );
+  await app.register(async (api) => {
+    api.addHook("preHandler", auth);
+    await depositQuoteRoute(api, { config, connection, ipLimiter });
+  });
+  await app.register(async (api) => {
+    api.addHook("preHandler", auth);
+    await submitDepositRoute(api, { config, kora, ipLimiter, sanctions });
+  });
 
   await app.listen({ port: config.port, host: config.host });
 }

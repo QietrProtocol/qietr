@@ -74,7 +74,12 @@ export function wrapFetch(
 
   return async (input, init) => {
     let attempts = 0;
-    let lastRes = await baseFetch(input, init);
+    let lastRes: Response;
+    try {
+      lastRes = await baseFetch(input, init);
+    } catch (e) {
+      throw new Error(`x402 fetch failed: ${(e as Error).message}`);
+    }
     while (lastRes.status === 402 && attempts < maxRetries) {
       attempts += 1;
 
@@ -100,18 +105,28 @@ export function wrapFetch(
       const to = new PublicKey(requirement.payTo);
       const micro = BigInt(requirement.amount);
 
-      const result = await opts.pay({
-        to,
-        micro,
-        feePayer: opts.getFeePayer(),
-      });
+      let result;
+      try {
+        result = await opts.pay({
+          to,
+          micro,
+          feePayer: opts.getFeePayer(),
+        });
+      } catch (e) {
+        // Payment failed — don't retry, return original 402.
+        return lastRes;
+      }
       opts.setNote(result.updatedNote);
+
+      const payerPubkey = typeof opts.getFeePayer === "function"
+        ? opts.getFeePayer().publicKey.toBase58()
+        : "unknown";
 
       const receipt = {
         scheme: requirement.scheme,
         network: requirement.network,
         asset: requirement.asset,
-        payer: result.updatedNote.version, // placeholder until burner-relay lands
+        payer: payerPubkey,
         payee: requirement.payTo,
         amount: requirement.amount,
         signature: result.withdrawSignature,
@@ -126,7 +141,13 @@ export function wrapFetch(
           "X-PAYMENT": header,
         },
       };
-      lastRes = await baseFetch(input, retryInit);
+      try {
+        lastRes = await baseFetch(input, retryInit);
+      } catch (e) {
+        // Payment succeeded but retry fetch failed — merchant may still
+        // receive the payment. Return the original 402.
+        return lastRes;
+      }
     }
 
     return lastRes;
