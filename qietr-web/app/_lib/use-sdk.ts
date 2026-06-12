@@ -28,14 +28,23 @@ function readCluster(): Cluster {
 export function useQietrSdk(): QietrSDK | null {
   const { connection } = useConnection();
   return useMemo(() => {
-    const cluster = readCluster();
-    const indexerUrl =
-      process.env.NEXT_PUBLIC_QIETR_INDEXER_URL ?? undefined;
-    return new QietrSDK({
-      cluster,
-      rpcUrl: connection.rpcEndpoint,
-      indexerUrl,
-    });
+    const indexerUrl = process.env.NEXT_PUBLIC_QIETR_INDEXER_URL;
+    const proverPath = process.env.NEXT_PUBLIC_QIETR_PROVER_PATH;
+    // The SDK now requires both an indexer base URL and a circuit-artifact
+    // (prover) base URL and throws if either is missing. Without them the app
+    // cannot deposit or pay, so return null and let callers show a
+    // not-configured state instead of crashing the render.
+    if (!indexerUrl || !proverPath) return null;
+    try {
+      return new QietrSDK({
+        cluster: readCluster(),
+        rpcUrl: connection.rpcEndpoint,
+        indexerUrl,
+        proverPath,
+      });
+    } catch {
+      return null;
+    }
   }, [connection.rpcEndpoint]);
 }
 
