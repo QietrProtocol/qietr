@@ -1,10 +1,23 @@
 # Session State — handoff notes
 
-**Last updated:** 2026-06-12 (Session 5: devnet deploy — all 3 programs live, e2e deposit + Groth16 withdraw passed)
+**Last updated:** 2026-06-12 (Session 6: security constraints deployed to devnet + full e2e re-verified, SDK create_job account-order bug fixed)
 
 ---
 
-## Session 5 — devnet deploy (latest)
+## Session 6 — security deploy + full devnet verification (latest)
+
+- **Deployed security fixes to devnet** (both verified by `solana program dump` + sha256 match against local .so):
+  - pool `4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib` — `fee_vault` mint must match denomination mint (slot 468945210).
+  - escrow `DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz` — `cancel_job`/`resolve_dispute` refund destination pinned to `job.client` + mint-match on all ATAs (sig `5juRKPTP…`).
+- **SDK bug found by devnet e2e + fixed:** `buildCreateJobIx` had `system_program`/`token_program` swapped vs the on-chain `CreateJob` struct → `InvalidProgramId (3008)`. Fixed in `qietr-sdk/src/escrow.ts`; test now asserts the exact account order. SDK 100/100.
+- **New e2e:** `qietr-pool/scripts/devnet-e2e-agent.mts` — escrow create→accept→complete→release→close, *negative test* (cancel with non-client ATA must be rejected — proves the security fix live), cancel/refund path, msg send→decrypt→close. **PASSED on devnet.**
+- **Pool e2e re-run after upgrade: PASSED** (deposit `5MbP57DL…`, Groth16 withdraw `LGTvSBdo…`).
+- **Network workaround:** this box's NAT64/IPv6 path to `api.devnet.solana.com` is flaky and the public RPC rate-limits deploy bursts. `qietr-pool/scripts/rpc-proxy.cjs` runs a local IPv4-pinned retrying proxy on `http://127.0.0.1:8899` (+ ws passthrough on 8900). Deploy with `-u http://127.0.0.1:8899` in TPU mode (NOT `--use-rpc` — that hits sendTransaction rate limits). A deploy that errors with 429 may still have landed — always verify with `solana program show` (slot) + `solana program dump` (hash).
+- Orphaned deploy buffers from failed attempts can be reclaimed: `solana program close <buffer> --bypass-warning`.
+
+---
+
+## Session 5 — devnet deploy
 
 - **Toolchain:** installed avm + Anchor CLI 0.31.1 (binary copied to `~/.cargo/bin/anchor.exe`; symlink fails on Windows; old 0.30.1 backed up as `anchor-0.30.1-backup.exe`).
 - **Program IDs (devnet, all live, upgrade authority `GWxyJs7G9FPUY58UTtUSpVwFuXTRdXzneyBcekxmvuR4`):**

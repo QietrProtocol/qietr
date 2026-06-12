@@ -50,10 +50,25 @@ describe("buildCreateJobIx", () => {
 
     const ix = buildCreateJobIx(agent, nonce, priceMicro, client, clientAta, mint);
     assert.equal(ix.programId.toBase58(), QIETR_ESCROW_PROGRAM_ID.toBase58());
-    // 8 account keys: job, vault, clientAta, client, mint, systemProgram, tokenProgram, rent
+    // 8 account keys, in on-chain CreateJob order:
+    // job, vault, clientAta, client, mint, tokenProgram, systemProgram, rent
     assert.equal(ix.keys.length, 8);
+    assert.equal(ix.keys[2].pubkey.toBase58(), clientAta.toBase58());
     assert.equal(ix.keys[3].pubkey.toBase58(), client.toBase58());
     assert.equal(ix.keys[3].isSigner, true);
+    assert.equal(ix.keys[4].pubkey.toBase58(), mint.toBase58());
+    assert.equal(
+      ix.keys[5].pubkey.toBase58(),
+      "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+    );
+    assert.equal(
+      ix.keys[6].pubkey.toBase58(),
+      "11111111111111111111111111111111",
+    );
+    assert.equal(
+      ix.keys[7].pubkey.toBase58(),
+      "SysvarRent111111111111111111111111111111111",
+    );
     // data: disc(8) + agent(32) + nonce(8) + priceMicro(8) = 56
     assert.equal(ix.data.length, 56);
     // agent pubkey is encoded right after the discriminator
