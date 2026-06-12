@@ -118,7 +118,7 @@ export default function GettingStarted() {
 
         <h3 style={{ fontSize: "1.125rem", marginBottom: "var(--space-2)" }}>Step 1: Connect wallet</h3>
         <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-4)" }}>
-          Go to <a href="/app/">qietr.com/app</a> and connect your Solana wallet.
+          Open the <a href="/app/">app</a> and connect your Solana wallet.
         </p>
 
         <h3 style={{ fontSize: "1.125rem", marginBottom: "var(--space-2)" }}>Step 2: Deposit</h3>

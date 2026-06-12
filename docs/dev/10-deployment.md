@@ -1,8 +1,30 @@
-# Deployment Plan — Qietr Devnet
+# Deployment — Qietr Devnet
 
-**Phase F of IMPLEMENTATION_PLAN.md**
+## Live devnet deployment
 
-## F1 — Deploy pool program to devnet
+All three programs are **deployed and live on Solana devnet** (upgrade authority
+`GWxyJs7G9FPUY58UTtUSpVwFuXTRdXzneyBcekxmvuR4`). End-to-end flows (deposit,
+Groth16 withdraw, escrow lifecycle, encrypted messaging) have been verified
+on-chain.
+
+| Program | Program ID |
+|---|---|
+| `qietr_pool` | `4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib` |
+| `qietr_escrow` | `DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz` |
+| `qietr_msg` | `6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez` |
+
+Verify any of them with `solana program show <ID> -u devnet`.
+
+> **Note:** the deployed pool ships the development Powers-of-Tau (`pot14`)
+> verifying key. A production deployment must replace it with a key from a
+> multi-party trusted-setup ceremony (see [11-trusted-setup.md](11-trusted-setup.md)).
+
+---
+
+## Reproducing a fresh deployment
+
+The steps below document how to deploy the pool program from scratch (e.g. for a
+new cluster or a clean keypair rotation).
 
 ### Prerequisites
 
@@ -12,9 +34,7 @@
 
 ### Steps
 
-1. **Rotate program keypair**
-
-   Current placeholder: `2zaHsJNoZ1adQtecG7yRv1NCCVzaX3yaRD6CeQBQimVc`
+1. **Generate a program keypair**
 
    ```bash
    solana-keygen new --no-bip39-passphrase -o target/deploy/qietr_pool-keypair.json
@@ -52,7 +72,11 @@
    ```
    This script creates a test mint, initializes PoolConfig + denominations, deposits, and withdraws.
 
-## F2 — Host circuit artifacts on Cloudflare R2
+## Host circuit artifacts on Cloudflare R2 _(not yet done)_
+
+> **Status:** pending. The SDK currently loads prover artifacts from a local
+> `proverPath`. Public CDN hosting is required before a browser-based public
+> deployment.
 
 ### Bucket structure
 
@@ -87,7 +111,10 @@ Create `circuits.qietr.com` CNAME pointing to the R2 bucket endpoint.
 The SDK fetches artifacts from `https://circuits.qietr.com/{filename}` by default.
 Override via `QietrSDKConfig.proverPath`.
 
-## F3 — Deploy web app to Cloudflare Pages
+## Deploy web app to Cloudflare Pages _(not yet done)_
+
+> **Status:** pending. The Next.js app builds to a clean static export and runs
+> locally; it has not been deployed to a public domain yet.
 
 ### Build
 

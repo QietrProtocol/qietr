@@ -26,7 +26,7 @@ solana-test-validator \
 ```json
 {
   "libpath": "target/release/libqietr_indexer_geyser.so",
-  "pool_program_id": "RrG8g32Kuo2tfbG8swwgYweDRtdKpTjpUxKT4RnEWLb",
+  "pool_program_id": "4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib",
   "db_url": "postgres://qietr:qietr@localhost:5432/qietr_indexer",
   "component_name": "geyser-devnet"
 }

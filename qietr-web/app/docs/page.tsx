@@ -66,7 +66,7 @@ export default function DocsHome() {
         <div>
           <p style={{ margin: "0 0 var(--space-1)" }}>
             <strong>App:</strong>{" "}
-            <a href="https://qietr.com/app">qietr.com/app</a>
+            <a href="/app/">/app</a> <span style={{ color: "var(--text-secondary)" }}>(devnet)</span>
           </p>
           <p style={{ margin: "0 0 var(--space-1)" }}>
             <strong>GitHub:</strong>{" "}

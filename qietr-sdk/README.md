@@ -2,7 +2,8 @@
 
 TypeScript SDK for [Qietr](../README.md) — privacy-preserving stablecoin payments on Solana with native x402 support.
 
-**Status:** implemented. 38/38 tests pass. Typed, built, ready for integration.
+**Status:** implemented and tested against the live devnet programs. 100/100 unit
+tests pass. Not yet published to npm — build from source (see Quick start).
 
 ## Layout
 
@@ -12,8 +13,7 @@ qietr-sdk/
   tsconfig.json                 # strict, ES2022, Bundler resolution
   src/
     index.ts                    # public exports
-    sdk.ts                      # QietrSDK class (405 lines — real deposit/pay/wrapFetch)
-    sdk.ts                      # QietrSDK class
+    sdk.ts                      # QietrSDK class — deposit/pay/wrapFetch
     note.ts                     # Argon2id + AES-256-GCM encryption
     prover.ts                   # Witness + Groth16 proof generation (snarkjs wasm)
     x402.ts                     # wrapFetch 402 retry flow
@@ -25,19 +25,20 @@ qietr-sdk/
     randomness.ts               # Field element randomness
     indexer-client.ts            # Indexer API client
     types.ts                    # Shared interfaces
-  test/                         # 14 test suites, 38 cases (node:test)
+  test/                         # node:test suites — 100 cases
   dist/                         # Compiled JS + declarations
 ```
 
-## Target shape
+## Usage
 
 ```ts
 import { QietrSDK } from "@qietr/sdk";
 
 const sdk = new QietrSDK({
-  cluster: "mainnet-beta",
-  relayerUrl: "https://relay.qietr.com",
-  proverPath: "https://prover.qietr.com",
+  cluster: "devnet",
+  indexerUrl: "http://localhost:8080",      // your indexer-api instance
+  proverPath: "./qietr-circuits/build",     // local prover artifacts
+  // relayerUrl: "http://localhost:4080",   // optional, for gasless deposits
 });
 
 const note = await sdk.deposit({ amount: 10, payer: walletAdapter });
@@ -57,17 +58,16 @@ const updatedNote = sdk.getUpdatedNote();
 
 ```bash
 npm install
-npm run build         # emits dist/
-npm test              # 38 tests — all pass
+npm run build         # emits dist/ (run before npm test)
+npm test              # 100 tests — all pass
 ```
 
-## Next pass
-
-1. Wire IDL-driven instruction paths once Anchor IDL is finalized.
-2. Full end-to-end test against devnet.
+> The SDK requires `indexerUrl` and `proverPath` in its config (no hosted
+> defaults). Point them at your indexer instance and local prover artifacts.
 
 ## Security
 
 - The SDK never sends a note off-device unencrypted.
-- The hosted prover at `prover.qietr.com` reveals payment metadata to the operator. It is opt-in; the WASM prover is the default.
+- Proving runs locally via the WASM prover by default. A remote prover (if you configure `proverPath` to a hosted URL) would see payment metadata — keep it local for full privacy.
 - Burner keypairs are generated per-payment, used once, then discarded. They never see SOL — fees come from the relayer.
+- The devnet deployment ships the development `pot14` verifying key, which is **not** safe for production. A trusted-setup ceremony is required before mainnet.

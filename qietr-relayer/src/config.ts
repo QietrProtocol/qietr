@@ -75,7 +75,7 @@ export function loadConfig(): RelayerConfig {
     logLevel: process.env.LOG_LEVEL ?? "info",
     rpcUrl: process.env.SOLANA_RPC_URL ?? "https://api.devnet.solana.com",
     programId: new PublicKey(
-      process.env.PROGRAM_ID ?? "RrG8g32Kuo2tfbG8swwgYweDRtdKpTjpUxKT4RnEWLb",
+      process.env.PROGRAM_ID ?? "4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib",
     ),
     feePayer: parseFeePayer(),
     feeAmountMicro: Number(process.env.FEE_AMOUNT_MICRO ?? 50000),

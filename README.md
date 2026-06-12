@@ -1,86 +1,143 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/QietrProtocol/.github/main/assets/brand/qietr-logo.svg" alt="Qietr" width="120" />
-</p>
-
 <h1 align="center">Qietr</h1>
 
 <p align="center">
-  <em>Zero-knowledge privacy layer for HTTP 402 micropayments on Solana.</em>
+  <strong>Zero-knowledge privacy layer for HTTP 402 micropayments on Solana.</strong>
   <br />
-  Pay for APIs, content, and metered services in USDC — without revealing identity, history, or balance.
+  Pay for APIs, content, and metered services in USDC — without revealing your identity, history, or balance.
 </p>
 
 <p align="center">
+  <a href="#what-is-qietr">Overview</a> •
+  <a href="#how-it-works">How it works</a> •
   <a href="#architecture">Architecture</a> •
-  <a href="#quick-start">Quick Start</a> •
-  <a href="#subprojects">Subprojects</a> •
-  <a href="#docs">Docs</a> •
-  <a href="#license">License</a>
+  <a href="#quick-start">Quick start</a> •
+  <a href="#deployment-status">Status</a> •
+  <a href="#docs">Docs</a>
+</p>
+
+<p align="center">
+  <em>Status: live on Solana devnet · not yet audited · not on mainnet</em>
 </p>
 
 ---
 
 ## What is Qietr?
 
-Qietr lets AI agents and humans pay for APIs, content, and metered services privately. It wraps **HTTP 402 (x402)** micropayments in a zero-knowledge pool:
+The web is gaining a native payment rail: **HTTP 402 (x402)** lets a server demand
+a stablecoin payment before returning a response. It is ideal for AI agents paying
+for APIs, tools, and data on the fly. But a naive x402 payment is fully public —
+anyone watching the chain sees exactly who paid whom, when, and how much.
 
-| | x402 (plain) | Qietr (private) |
+Qietr fixes that. It wraps x402 micropayments in a **zero-knowledge shielded pool**:
+users deposit USDC into a common pool, then pay merchants by proving — in zero
+knowledge — that they own an unspent deposit, without revealing which one. The
+merchant gets paid and verifies the payment; they learn nothing about the payer.
+
+| | x402 (plain) | Qietr (shielded) |
 |---|---|---|
-| **Flow** | Alice → Bob | Pool → Bob |
-| **Linkability** | Everyone sees Alice paid Bob | Bob sees payment, cannot identify Alice |
-| **Privacy** | None | Anonymity set + ZK proof |
+| **Payment flow** | Alice → Bob | Pool → Bob |
+| **Linkability** | Everyone sees Alice paid Bob | Bob sees a valid payment, cannot identify Alice |
+| **Privacy set** | None | Every depositor in the pool |
+| **Proof** | — | Groth16 zk-SNARK over BN254 |
+
+## How it works
+
+1. **Deposit** — A user deposits a fixed denomination of USDC (0.1 / 1 / 10 / 100)
+   into the shielded pool. The client generates a secret note (secret + nullifier),
+   and only its Poseidon **commitment** is published on-chain and inserted into a
+   Merkle tree. The link between the depositor and the commitment never leaves the
+   device.
+2. **Pay** — To pay a merchant, the client builds a Groth16 proof that it knows a
+   secret behind *some* leaf in the Merkle tree, and reveals only a **nullifier**
+   (which prevents double-spends). The on-chain program verifies the proof and
+   releases funds to the merchant. No link to the original deposit is revealed.
+3. **Relay (optional)** — A relayer can pay the Solana transaction fee on the
+   user's behalf (gasless deposits) so a fresh wallet never needs SOL, earning a
+   configurable fee in return.
+
+The same primitives power two agent-economy modules: **encrypted messaging**
+(`qietr-msg`) and **job escrow** with on-chain dispute resolution (`qietr-escrow`).
 
 ## Architecture
 
 ```
 qietr/
-├── qietr-circuits/    # Circom ZK circuits (Poseidon + Groth16 over BN254)
-├── qietr-pool/        # Anchor program — Merkle tree, deposit, withdraw, Groth16 verifier
-├── qietr-sdk/         # TypeScript SDK — notes, proofs, relayer client, x402 helper
-├── qietr-relayer/     # Fastify server — gasless deposits, fee management, sanctions
-├── qietr-indexer/     # Geyser plugin + Fastify API — on-chain state indexer
-├── qietr-web/         # Next.js app — wallet adapter, deposit/pay UI, note manager
-├── qietr-msg/         # Anchor program — encrypted off-chain messaging
-└── qietr-escrow/      # Anchor program — job escrow with CPI token transfer
+├── qietr-circuits/   # Circom ZK circuits — Poseidon hashing + Groth16 over BN254
+├── qietr-pool/       # Anchor program — Merkle tree, deposit, withdraw, Groth16 verifier
+├── qietr-sdk/        # TypeScript SDK — notes, proofs, relayer client, x402 helper
+├── qietr-relayer/    # Fastify service — gasless deposits, fee logic, rate-limit, sanctions
+├── qietr-indexer/    # Geyser plugin + Fastify API — indexes pool state into Postgres
+├── qietr-web/        # Next.js app — wallet adapter, deposit/pay UI, note manager
+├── qietr-msg/        # Anchor program — encrypted off-chain messaging
+└── qietr-escrow/     # Anchor program — agent job escrow with CPI token transfers
 ```
 
-### How it works
+## Quick start
 
-1. **Deposit** — User deposits USDC into a shielded pool. A ZK note (secret + nullifier + commitment) is generated client-side.
-2. **Pay** — User proves ownership of a note via Groth16 proof and submits a withdrawal to the merchant's address. The proof reveals only the nullifier — no link to the depositor.
-3. **Relay** — A relayer optionally covers Solana tx fees (gasless deposit) and earns fees.
-
-## Quick Start
+> **Note:** `@qietr/sdk` is **not yet published to npm.** Build it from source
+> until the first release lands.
 
 ```bash
-# Install SDK
-npm install @qietr/sdk
+git clone https://github.com/QietrProtocol/qietr
+cd qietr/qietr-sdk
+npm install
+npm run build
+npm test            # 100/100
+```
 
-# Generate a note and deposit
+```ts
 import { QietrSDK } from "@qietr/sdk";
 
 const sdk = new QietrSDK({
-  rpcUrl: "https://api.devnet.solana.com",
-  programId: "RrG8g32Kuo2tfbG8swwgYweDRtdKpTjpUxKT4RnEWLb",
+  cluster: "devnet",
+  programId: "4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib",
+  indexerUrl: "http://localhost:8080",   // your indexer-api instance
+  proverPath: "./qietr-circuits/build",  // local prover artifacts
 });
 
-const note = await sdk.deposit({
-  amountMicroUsdc: "10000000", // 10 USDC
-});
+const note = await sdk.deposit({ amount: 10, payer: walletAdapter });
 ```
+
+The SDK requires `indexerUrl` and `proverPath` — there are no hosted defaults yet.
+See [`qietr-sdk/README.md`](qietr-sdk/README.md) for the full API.
+
+## Deployment status
+
+All three on-chain programs are **deployed and verified on Solana devnet**.
+End-to-end flows — deposit, Groth16 withdraw, escrow lifecycle, and encrypted
+messaging — have been exercised against the live programs.
+
+| Program | Devnet program ID |
+|---|---|
+| `qietr_pool` | `4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib` |
+| `qietr_escrow` | `DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz` |
+| `qietr_msg` | `6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez` |
+
+Verify with `solana program show <ID> -u devnet`.
+
+**Not yet done** (and not claimed):
+
+- ❌ **Mainnet** — devnet only.
+- ❌ **Security audit** — planned before any mainnet deployment.
+- ❌ **Trusted-setup ceremony** — the pool currently ships the development `pot14`
+  verifying key, which is **not production-safe**. A multi-party ceremony is
+  required before mainnet.
+- ❌ **Public web app / hosted prover / npm package** — run the web UI and prover
+  locally for now.
+- ❌ **$QIET token** — designed in the docs, not minted.
 
 ## Subprojects
 
 | Subproject | Stack | State |
 |---|---|---|
-| `qietr-circuits` | Circom + snarkjs | Compiled, dev keys ready — 6/6 tests |
-| `qietr-pool` | Anchor + Groth16 | 7 instructions, Merkle tree — cargo check clean |
-| `qietr-sdk` | TypeScript | Deposit/pay/wrapFetch, Poseidon + note encryption — 38/38 tests |
-| `qietr-relayer` | Fastify + Kora | Gasless deposits, rate-limiter, sanctions — tsc clean |
-| `qietr-indexer` | Rust Geyser + Fastify | On-chain event indexer, Postgres — tsc clean |
-| `qietr-web` | Next.js + Wallet Adapter | 12 routes, static export — build clean |
-| `qietr-msg` | Anchor | Encrypted messaging PDA |
-| `qietr-escrow` | Anchor | Job escrow with CPI token transfers |
+| `qietr-circuits` | Circom + snarkjs | Groth16 circuit compiled, dev keys — 6/6 tests |
+| `qietr-pool` | Anchor + Groth16 | Live on devnet — 3/3 Rust tests, mocha suite |
+| `qietr-sdk` | TypeScript | deposit / pay / wrapFetch, Poseidon + note encryption — 100/100 tests |
+| `qietr-relayer` | Fastify + Kora | Gasless deposits, rate-limiter, sanctions — 6/6 auth tests |
+| `qietr-indexer` | Rust Geyser + Fastify | Pool-state indexer into Postgres — 6/6 plugin tests |
+| `qietr-web` | Next.js + Wallet Adapter | 15 static routes, deposit/pay/note/activity — builds clean |
+| `qietr-msg` | Anchor | Encrypted messaging PDA — live on devnet |
+| `qietr-escrow` | Anchor | Job escrow with CPI token transfers — live on devnet |
 
 ## Docs
 
@@ -100,9 +157,12 @@ const note = await sdk.deposit({
 | 12 | [Cross-Chain](docs/dev/12-cross-chain.md) |
 | 13 | [Agent Ecosystem](docs/dev/13-agent-ecosystem.md) |
 
-## Status
+## Security
 
-Implementation complete and ready for **devnet rollout**. All subprojects type-check and pass tests.
+Qietr is **pre-audit** software deployed on devnet for testing. Do not use it with
+real funds. The shielded pool's privacy guarantees depend on a trusted-setup
+ceremony that has **not** yet been performed. Report vulnerabilities to
+security@qietr.com.
 
 ## License
 

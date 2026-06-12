@@ -151,7 +151,8 @@ const payment = await sdk.pay({
           </div>
         </div>
         <p style={{ marginTop: "var(--space-4)", fontSize: "0.9375rem" }}>
-          <code style={{ background: "var(--surface-1)", padding: "2px 6px", borderRadius: 4 }}>$ npm install @qietr/sdk</code>
+          <code style={{ background: "var(--surface-1)", padding: "2px 6px", borderRadius: 4 }}>$ git clone github.com/QietrProtocol/qietr &amp;&amp; cd qietr-sdk</code>
+          <span style={{ marginLeft: "var(--space-2)", fontSize: "0.8125rem", color: "var(--text-secondary)" }}>npm package coming soon</span>
         </p>
       </section>
 

@@ -126,7 +126,7 @@ Single column on mobile, two-column on desktop ≥ 1024px.
 │                                                                    │
 │  [Open app] [Read docs]                                            │
 │                                                                    │
-│  Built on Solana · Open source · Audited (Q2 2026)                 │
+│  Built on Solana · Open source · Audit planned pre-mainnet         │
 │                                                                    │
 ├──────────────────────────────────────────────────────────────────┤
 │  Three sections, each one card:                                    │

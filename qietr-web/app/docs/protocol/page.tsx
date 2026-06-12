@@ -154,12 +154,15 @@ export default function ProtocolPage() {
           }}
         >
           <p style={{ margin: 0, fontFamily: "var(--font-mono)", fontSize: "0.875rem" }}>
-            <span style={{ color: "var(--text-secondary)" }}>$ </span>npm install @qietr/sdk
+            <span style={{ color: "var(--text-secondary)" }}>$ </span>git clone github.com/QietrProtocol/qietr
+          </p>
+          <p style={{ margin: "var(--space-2) 0 0", fontSize: "0.8125rem", color: "var(--text-secondary)" }}>
+            Build from <code>qietr-sdk/</code>. The npm package <code>@qietr/sdk</code> is not published yet.
           </p>
         </div>
 
         <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", borderTop: "1px solid var(--border-subtle)", paddingTop: "var(--space-4)" }}>
-          Full SDK reference: <a href="https://github.com/QietrProtocol/qietr-sdk">github.com/QietrProtocol/qietr-sdk</a>
+          Full SDK reference: <a href="https://github.com/QietrProtocol/qietr/tree/main/qietr-sdk">github.com/QietrProtocol/qietr</a>
         </p>
       </div>
     </main>
