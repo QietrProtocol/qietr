@@ -480,8 +480,12 @@ pub struct Withdraw<'info> {
         constraint = recipient_ata.mint == denomination.mint @ QietrError::UnknownDenomination,
     )]
     pub recipient_ata: Box<Account<'info, TokenAccount>>,
-    /// CHECK: validated in withdraw body; only used when config.fee_vault != default.
-    #[account(mut)]
+    /// Validated against config.fee_vault in the withdraw body; only used
+    /// when config.fee_vault != default.
+    #[account(
+        mut,
+        constraint = fee_vault.mint == denomination.mint @ QietrError::FeeVaultMismatch,
+    )]
     pub fee_vault: Option<Box<Account<'info, TokenAccount>>>,
     #[account(mut)]
     pub fee_payer: Signer<'info>,

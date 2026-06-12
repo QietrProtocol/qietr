@@ -234,6 +234,10 @@ pub enum EscrowError {
     PriceMustBePositive,
     #[msg("Agent ATA does not match agent's owner")]
     AgentAtaMismatch,
+    #[msg("Client ATA is not owned by the job's client")]
+    ClientAtaMismatch,
+    #[msg("Token account mint does not match the escrow vault")]
+    MintMismatch,
     #[msg("Accept timeout has not elapsed")]
     AcceptTimeoutNotElapsed,
     #[msg("Dispute timeout has not elapsed")]
@@ -318,6 +322,7 @@ pub struct ReleasePayment<'info> {
     #[account(
         mut,
         constraint = agent_ata.owner == job.agent @ EscrowError::AgentAtaMismatch,
+        constraint = agent_ata.mint == escrow_vault.mint @ EscrowError::MintMismatch,
     )]
     pub agent_ata: Account<'info, TokenAccount>,
     pub client: Signer<'info>,
@@ -349,7 +354,11 @@ pub struct CancelJob<'info> {
         bump = job.escrow_bump,
     )]
     pub escrow_vault: Account<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = client_ata.owner == job.client @ EscrowError::ClientAtaMismatch,
+        constraint = client_ata.mint == escrow_vault.mint @ EscrowError::MintMismatch,
+    )]
     pub client_ata: Account<'info, TokenAccount>,
     pub client: Signer<'info>,
     pub token_program: Program<'info, Token>,
@@ -369,7 +378,14 @@ pub struct ResolveDispute<'info> {
         bump = job.escrow_bump,
     )]
     pub escrow_vault: Account<'info, TokenAccount>,
-    #[account(mut)]
+    // resolve_dispute is permissionless, so the refund destination MUST be
+    // pinned to the job's client — otherwise any caller could pass their own
+    // token account and steal the refund.
+    #[account(
+        mut,
+        constraint = client_ata.owner == job.client @ EscrowError::ClientAtaMismatch,
+        constraint = client_ata.mint == escrow_vault.mint @ EscrowError::MintMismatch,
+    )]
     pub client_ata: Account<'info, TokenAccount>,
     /// Anyone can trigger the timeout-based resolution.
     pub caller: Signer<'info>,
