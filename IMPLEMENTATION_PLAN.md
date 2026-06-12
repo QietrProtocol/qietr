@@ -54,7 +54,7 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked by
 
 ## Phase I — Devnet rollout
 
-- [!] **I1.** Rotate program keypair, deploy to devnet, initialize tiers, end-to-end deposit + pay.
+- [x] **I1.** Deployed to devnet (2026-06-12, Anchor 0.31.1): pool `4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib`, escrow `DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz`, msg `6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez`. Pool ID rotated (old config PDA had pre-`fee_vault` 116-byte layout). E2E deposit + Groth16 withdraw passed (`qietr-pool/scripts/devnet-e2e.mts`).
 - [!] **I2.** Host circuit artifacts on Cloudflare R2 (`circuits.qietr.com`).
 - [!] **I3.** Deploy `qietr-web` static export to Cloudflare Pages at `qietr.com`.
 
@@ -65,7 +65,7 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked by
 
 ## Phase K — Token launch
 
-- [ ] **K1.** Mint `$QIET` SPL, wire pool fee-share, launch.
+- [!] **K1.** `$QIET` launch deferred — will be created via pump.fun later (user decision, 2026-06-12). After launch: update `QIET_MINT_*` SDK constants + call `set_fee_vault`.
 
 ## Phase L — Cross-chain
 

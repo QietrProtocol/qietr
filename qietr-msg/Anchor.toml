@@ -6,10 +6,10 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-qietr_msg = "2uA7fwAVXbmPNkYsjf5F1zQzxvmQvjNFLCHwSasYqWaL"
+qietr_msg = "6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez"
 
 [programs.devnet]
-qietr_msg = "2uA7fwAVXbmPNkYsjf5F1zQzxvmQvjNFLCHwSasYqWaL"
+qietr_msg = "6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez"
 
 [registry]
 url = "https://api.apr.dev"

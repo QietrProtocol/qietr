@@ -18,7 +18,7 @@ import {
 
 /** Pool program-id — matches `declare_id!` in qietr_pool/src/lib.rs. */
 export const QIETR_POOL_PROGRAM_ID = new PublicKey(
-  "RrG8g32Kuo2tfbG8swwgYweDRtdKpTjpUxKT4RnEWLb",
+  "4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib",
 );
 
 /** SPL Token program-id (canonical). */
@@ -253,9 +253,6 @@ export function buildWithdrawIx(
     offset += 32;
   }
 
-  // 32-byte all-zero pubkey for optional fee_vault (Anchor maps default() to None).
-  const DEFAULT_PUBKEY = new PublicKey("11111111111111111111111111111111");
-
   const keys: TransactionInstruction["keys"] = [
     { pubkey: accts.config, isSigner: false, isWritable: false },
     { pubkey: accts.denomination, isSigner: false, isWritable: false },
@@ -263,7 +260,8 @@ export function buildWithdrawIx(
     { pubkey: accts.vault, isSigner: false, isWritable: true },
     { pubkey: accts.nullifier, isSigner: false, isWritable: true },
     { pubkey: accts.recipientAta, isSigner: false, isWritable: true },
-    { pubkey: accts.feeVault ?? DEFAULT_PUBKEY, isSigner: false, isWritable: true },
+    // Anchor's None sentinel for optional accounts is the program id itself.
+    { pubkey: accts.feeVault ?? programId, isSigner: false, isWritable: !!accts.feeVault },
     { pubkey: accts.feePayer, isSigner: true, isWritable: true },
     {
       pubkey: accts.tokenProgram ?? TOKEN_PROGRAM_ID,

@@ -7,7 +7,7 @@
 
 use anchor_lang::prelude::*;
 
-declare_id!("2uA7fwAVXbmPNkYsjf5F1zQzxvmQvjNFLCHwSasYqWaL");
+declare_id!("6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez");
 
 pub const MAX_MSG_BYTES: usize = 1024;
 

@@ -1,6 +1,21 @@
 # Session State — handoff notes
 
-**Last updated:** 2026-06-12 (Session 4: hardening pass — escrow lifecycle, close instructions, pool guards, SDK error handling + required config, relayer auth)
+**Last updated:** 2026-06-12 (Session 5: devnet deploy — all 3 programs live, e2e deposit + Groth16 withdraw passed)
+
+---
+
+## Session 5 — devnet deploy (latest)
+
+- **Toolchain:** installed avm + Anchor CLI 0.31.1 (binary copied to `~/.cargo/bin/anchor.exe`; symlink fails on Windows; old 0.30.1 backed up as `anchor-0.30.1-backup.exe`).
+- **Program IDs (devnet, all live, upgrade authority `GWxyJs7G9FPUY58UTtUSpVwFuXTRdXzneyBcekxmvuR4`):**
+  - pool `4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib` — **rotated**: old `2zaHsJNo…` had a stale 116-byte config PDA from a pre-`fee_vault` deploy (current layout 148 B) → `AccountDidNotDeserialize`. Old keypair saved as `target/deploy/qietr_pool-keypair.OLD.json`.
+  - escrow `DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz` — adopted existing keypair (declare_id had drifted).
+  - msg `6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez` — adopted existing keypair.
+  - All IDs updated in lib.rs + Anchor.toml + SDK constants + READMEs + pool scripts. SDK's `QIETR_POOL_PROGRAM_ID` had a third stale ID (`RrG8g32K…`) — fixed.
+- **SDK fix:** `buildWithdrawIx` passed `SystemProgram` id as the optional `fee_vault` sentinel; Anchor 0.31 expects the **program id itself** for `Option<Account>` = None (and it must not be writable). Fixed in `qietr-sdk/src/program.ts`.
+- **E2E:** `qietr-pool/scripts/devnet-e2e.mts` (run: `node scripts/devnet-e2e.mts`, needs `ANCHOR_WALLET`) — creates test mint, init pool + random-denom tier, deposit 10 USDC, Groth16 prove, withdraw 4 USDC. **PASSED** on devnet.
+- **Tests:** SDK 100/100 after changes.
+- ⚠️ Devnet pool config has the **dev pot14 VK** and fee_bps=50 with no fee_vault set; e2e tiers use throwaway mints. Real USDC tiers + R2 artifact hosting + web deploy (I2/I3) still pending.
 
 ---
 
@@ -78,7 +93,7 @@
 
 | Task | Why blocked |
 |------|------------|
-| **Devnet deploy** (F1–F3 in plan) | Needs Solana CLI + Cloudflare R2 + Pages |
+| ~~Devnet deploy~~ (I1) | **DONE Session 5** — programs live, e2e passed. I2 (R2 artifact hosting) + I3 (Pages web deploy) still need Cloudflare |
 | **`$QIET` mint** | Needs SPL token creation + SDK constant update |
 | **Trusted-setup ceremony** (J1) | Needs contributor coordination |
 | **Audit** (J2) | User decision + budget |

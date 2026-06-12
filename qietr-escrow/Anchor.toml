@@ -6,10 +6,10 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-qietr_escrow = "BqAeDVPRdokf5q5XQmHoanwEYgyNwV9xWjbUMGQJRmJE"
+qietr_escrow = "DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz"
 
 [programs.devnet]
-qietr_escrow = "BqAeDVPRdokf5q5XQmHoanwEYgyNwV9xWjbUMGQJRmJE"
+qietr_escrow = "DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz"
 
 [registry]
 url = "https://api.apr.dev"

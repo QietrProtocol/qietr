@@ -38,7 +38,7 @@ use merkle::{poseidon_hash_two, MerkleAppend};
 use state::*;
 use verifier::{PROOF_BYTES, PUBLIC_SIGNAL_COUNT};
 
-declare_id!("2zaHsJNoZ1adQtecG7yRv1NCCVzaX3yaRD6CeQBQimVc");
+declare_id!("4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib");
 
 /// ~24h on mainnet at 400ms slots = 216,000. We use 432,000 (~48h) for
 /// extra safety margin during VK rotations.

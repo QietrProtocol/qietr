@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_spl::token::{self, Mint, Token, TokenAccount, Transfer};
 
-declare_id!("BqAeDVPRdokf5q5XQmHoanwEYgyNwV9xWjbUMGQJRmJE");
+declare_id!("DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz");
 
 pub const MAX_SPEC_BYTES: usize = 1024;
 /// 7 days in seconds for dispute and acceptance timeouts.

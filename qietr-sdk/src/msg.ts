@@ -6,7 +6,7 @@ import {
 } from "@solana/web3.js";
 
 export const QIETR_MSG_PROGRAM_ID = new PublicKey(
-  "2uA7fwAVXbmPNkYsjf5F1zQzxvmQvjNFLCHwSasYqWaL",
+  "6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez",
 );
 
 export const MAX_MESSAGE_BYTES = 1024;

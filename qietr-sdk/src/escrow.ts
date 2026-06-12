@@ -8,7 +8,7 @@ import {
 import { TOKEN_PROGRAM_ID } from "./program.js";
 
 export const QIETR_ESCROW_PROGRAM_ID = new PublicKey(
-  "BqAeDVPRdokf5q5XQmHoanwEYgyNwV9xWjbUMGQJRmJE",
+  "DBLjgT9mCjTF3q7zqDCnUrMtHEnBarNwqmk7XojB4FNz",
 );
 
 // ---------------------------------------------------------------------------

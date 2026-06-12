@@ -8,7 +8,7 @@ An Anchor program that stores encrypted messages as PDA accounts. Messages are e
 
 ## Program
 
-- **Program ID:** `2uA7fwAVXbmPNkYsjf5F1zQzxvmQvjNFLCHwSasYqWaL`
+- **Program ID:** `6ZAeJCLRrNyMCLYgH5uUdRNbA5usAun94vPtaTM5Xdez`
 - **Instructions:** `send`, `delete`
 - **Account:** `Message` — 1115 bytes fixed PDA (seeds: `["msg", from, to, nonce]`)
 
