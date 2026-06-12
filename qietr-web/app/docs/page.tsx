@@ -74,7 +74,7 @@ export default function DocsHome() {
           </p>
           <p style={{ margin: 0 }}>
             <strong>Twitter:</strong>{" "}
-            <a href="https://x.com/QietrOfficial">@QietrOfficial</a>
+            <a href="https://x.com/QietrCom">@QietrCom</a>
           </p>
         </div>
       </div>

@@ -184,7 +184,7 @@ export default function GettingStarted() {
 
         <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", borderTop: "1px solid var(--border-subtle)", paddingTop: "var(--space-4)" }}>
           <a href="https://github.com/QietrProtocol">View on GitHub</a> &middot;{" "}
-          <a href="https://x.com/QietrOfficial">@QietrOfficial</a>
+          <a href="https://x.com/QietrCom">@QietrCom</a>
         </p>
       </div>
     </main>

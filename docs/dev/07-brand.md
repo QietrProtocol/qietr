@@ -10,7 +10,7 @@
 - **Token ticker:** $QIET
 - **Domain:** `qietr.com`
 - **GitHub organization:** `QietrProtocol`
-- **X (Twitter):** `@QietrOfficial`
+- **X (Twitter):** `@QietrCom`
 - **GitHub user (project lead):** `qietr`
 
 ### Name origin
@@ -115,7 +115,7 @@ Critical rules:
 
 ## 6. Social presence
 
-- **X:** `@QietrOfficial`. Updates, milestones, no shilling, no engagement-bait threads.
+- **X:** `@QietrCom`. Updates, milestones, no shilling, no engagement-bait threads.
 - **GitHub:** `QietrProtocol`. All source, public.
 - **Docs site:** `docs.qietr.com`.
 - **Telegram / Discord:** considered post-launch. Not at TGE. Community channels invite scams; we delay until we can staff moderation.

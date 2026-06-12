@@ -26,7 +26,7 @@ export function Footer() {
       </span>
       <div style={{ display: "flex", gap: "var(--space-6)" }}>
         <a href="https://github.com/QietrProtocol" style={linkStyle}>GitHub</a>
-        <a href="https://x.com/QietrOfficial" style={linkStyle}>X</a>
+        <a href="https://x.com/QietrCom" style={linkStyle}>X</a>
         <Link href="/docs/" style={linkStyle}>Docs</Link>
         <Link href="/security/" style={linkStyle}>Security</Link>
         <Link href="/brand/" style={linkStyle}>Brand</Link>
