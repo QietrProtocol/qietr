@@ -6,6 +6,12 @@ follow [Semantic Versioning](https://semver.org/) once it reaches 1.0.
 
 ## [Unreleased]
 
+## [0.1.0-devnet] — 2026-06-13
+
+First tagged devnet milestone: the audit-2026-06-13 security backlog is applied
+and the hosted web UI submits real devnet deposits (proving in-browser). Devnet
+only, not audited, dev proving key.
+
 ### Security
 
 - **Relayer money path hardened (§3).** Deposit validation now verifies the SPL
