@@ -7,15 +7,23 @@
 #   - account state from the Solana RPC     (NEXT_PUBLIC_QIETR_RPC_URL)
 #   - optionally the relayer                (NEXT_PUBLIC_QIETR_RELAYER_URL)
 #
-# CSP must therefore allow `wasm-unsafe-eval`, `worker-src blob:`, and the
-# cross-origin hosts in connect-src. EDIT the connect-src host list below to
-# match YOUR deployed indexer / relayer / RPC domains, then redeploy.
+# CSP must therefore allow `unsafe-eval` AND `wasm-unsafe-eval` (snarkjs
+# 0.7.x / ffjavascript build their field-arithmetic functions with
+# `new Function`, which `wasm-unsafe-eval` alone does NOT permit),
+# `worker-src blob:`, and the cross-origin hosts in connect-src. EDIT the
+# connect-src host list below to match YOUR deployed indexer / relayer / RPC
+# domains, then redeploy.
+#
+# DELIBERATELY no fonts.googleapis.com / fonts.gstatic.com: the wallet-adapter
+# UI CSS @imports DM Sans from Google, which CSP blocks. We accept the cosmetic
+# fallback font (and one harmless console warning) rather than leak every
+# visitor's IP to Google on a privacy-focused payment tool. Do not "fix" this.
 
 /*
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self' https://*.helius-rpc.com https://*.solana.com https://api.devnet.solana.com https://*.onrender.com https://*.vercel.app; frame-ancestors 'none'; base-uri 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; worker-src 'self' blob:; connect-src 'self' https://*.helius-rpc.com https://*.solana.com https://api.devnet.solana.com https://*.onrender.com https://*.vercel.app; frame-ancestors 'none'; base-uri 'self'
 
 # Long-cache the immutable circuit artifacts.
 /circuits/*
