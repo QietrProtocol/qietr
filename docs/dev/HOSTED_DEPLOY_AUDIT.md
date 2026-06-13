@@ -77,45 +77,65 @@ Vercel: qietr.com (Next.js static export)  ──/circuits──► bundled WASM
 - ✅ `/health`, `/denominations`, `/merkle-proof` all return correct data from
   Render.
 
-## 4. CURRENT BUG — UI not interactive (root cause found, fix in progress)
+## 4. CSP BUGS — FIXED + VERIFIED LIVE (headless Chromium, 2026-06-13)
 
-**Symptom:** qietr.com loads but nothing is clickable — wallet connect / forms
-/ buttons dead.
+Two separate CSP defects, both found and fixed. Verified with a headless
+Chromium harness (Playwright) that loads `/` and `/app/deposit`, captures
+`securitypolicyviolation` events + console/page errors, and proves hydration by
+clicking a tier radio and asserting `aria-checked` moves.
 
-**Root cause:** the CSP `script-src` was `'self' 'wasm-unsafe-eval'` — missing
-`'unsafe-inline'`. Next.js static export injects inline `<script>` tags
-(`self.__next_f.push(...)`) to pass hydration data. Strict CSP blocked them, so
-React never hydrated → the page stayed a static shell. Confirmed: homepage has
-5 inline `<script>` tags + `__next_f`, blocked by the policy.
+**Bug 1 — UI not interactive (hydration). FIXED, committed `2f91cf9`, live.**
+`script-src` was missing `'unsafe-inline'`; Next.js static export injects inline
+`self.__next_f.push(...)` hydration scripts, which strict CSP blocked → React
+never hydrated → static shell. Added `'unsafe-inline'`.
+**VERIFIED:** clicking the "10 USDC" radio moves `aria-checked` to "0.1 USDC";
+wallet-connect button renders (client-only); zero pageErrors.
 
-**Fix applied (UNCOMMITTED at time of writing):** added `'unsafe-inline'` to
-`script-src` in BOTH `vercel.json` and `qietr-web/public/_headers`. New value:
+**Bug 2 — in-browser prover blocked (eval). FIXED, committed `500d8a3`, live.**
+`script-src` had only `'wasm-unsafe-eval'`, which permits WebAssembly compile but
+NOT `eval()`/`new Function()`. snarkjs 0.7.x (ffjavascript) builds its field
+arithmetic with `new Function`, so a `script-src 'eval'` violation fired on
+`/app/deposit` (where the SDK+snarkjs chunk loads) — withdraw/pay proving would
+have failed at runtime. Added `'unsafe-eval'`.
+**VERIFIED:** the `eval` violation is gone after redeploy; hydration still works.
 
+Current live value (both `vercel.json` and `qietr-web/public/_headers`, kept in sync):
 ```
-script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'
+script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval'
 ```
 
-> Trade-off: `'unsafe-inline'` weakens XSS hardening. Acceptable for a devnet
-> demo. The cleaner long-term fix is nonce/hash-based CSP, which a static export
-> can't easily do (no server to mint per-request nonces). Revisit before any
-> mainnet/production posture.
+> Trade-off: `'unsafe-inline'` + `'unsafe-eval'` weaken XSS hardening. Both are
+> required for this static-export + in-browser-snarkjs design and are acceptable
+> for a devnet demo. Cleaner long-term: nonce/hash CSP (needs a server) and/or a
+> snarkjs build that avoids `eval`. Revisit before any mainnet posture.
 
-## 5. NEXT STEPS (do these after context reset)
+**Remaining (intentional) violation:** the wallet-adapter UI CSS `@import`s
+DM Sans from `fonts.googleapis.com`, which CSP blocks → one harmless console
+warning + cosmetic fallback font in the wallet modal. **Deliberately NOT
+allowed** — loading Google fonts would leak every visitor's IP to Google on a
+privacy tool. Documented in `_headers`. Do not "fix" it.
 
-1. **Commit + push** the CSP fix (vercel.json + _headers). Currently uncommitted:
-   - `M vercel.json`, `M qietr-web/public/_headers`, `M .mcp.json`
-   - Also untracked: `AGENTS.md` (decide if it should be committed/ignored).
-2. Vercel auto-redeploys on push (or Redeploy manually). Wait for it to finish.
-3. **Re-test in a real browser** (curl can't catch hydration):
-   - Open https://qietr.com/app/deposit → "preview" banner should be GONE.
-   - Open DevTools Console — should be NO CSP violation errors.
-   - Connect a devnet wallet (Phantom/Solflare), deposit, then pay/withdraw.
-4. If buttons still dead after the fix:
-   - Check Console for remaining CSP blocks (tighten the specific directive).
-   - Verify wallet-adapter mounts: `WalletAdapterProvider` wraps in
-     `app/layout.tsx`; `autoConnect=false` is intentional.
-   - Confirm hydration isn't crashing on an SDK import (the SDK pulls snarkjs;
-     check for a browser polyfill / `Buffer` issue in console).
+## 5. NEXT STEPS
+
+1. ~~Commit + push the CSP fixes.~~ DONE — `2f91cf9` (unsafe-inline) +
+   `500d8a3` (unsafe-eval), both pushed and live on qietr.com.
+   - Still uncommitted/untracked, UNRELATED to deploy: `M .mcp.json`,
+     `?? AGENTS.md` (decide separately whether to commit/ignore).
+2. ~~Wait for Vercel redeploy.~~ DONE — verified live (`unsafe-eval` in the
+   served CSP header; eval violation gone in headless re-test).
+3. **Human step — needs a funded devnet wallet (curl/headless can't sign):**
+   Connect Phantom/Solflare on qietr.com, deposit a tier, then pay/withdraw.
+   This is the only thing left to confirm the full money path + that snarkjs
+   `fullProve` actually succeeds end-to-end (CSP no longer blocks it; artifacts
+   serve 200; but a real witness needs a real deposited note).
+   - NOTE: the `/app/deposit` "preview" `<Banner>` is **hardcoded copy**, not
+     SDK-driven — it will NOT disappear when env is configured. Do not treat
+     "banner gone" as a success signal. Interactivity (buttons fire) is the
+     real signal, and it's verified. If you want the banner to reflect real
+     config, make it conditional on `useQietrSdk() !== null`.
+4. Headless verify harness lives in `%TEMP%/qietr-verify/verify.mjs` (Playwright
+   + Chromium installed in the ms-playwright cache, ~150MB). Reusable for future
+   re-checks; delete the cache if you want the disk back.
 
 ## 6. Key files (for fast re-orientation)
 
@@ -148,4 +168,8 @@ Vercel (build-time, `NEXT_PUBLIC_*`): `QIETR_CLUSTER=devnet`,
   in the hosted path).
 - Two stray Render "Key Value" (Redis) instances were created by mistake — NOT
   used by anything; delete them in the Render dashboard.
-- `'unsafe-inline'` CSP — revisit with nonce/hash for production.
+- `'unsafe-inline'` + `'unsafe-eval'` CSP — revisit with nonce/hash and/or an
+  eval-free snarkjs build for production (see §4).
+- Wallet-adapter DM Sans Google-font is intentionally CSP-blocked (privacy); if
+  the cosmetic fallback ever matters, self-host the font instead of allowing
+  `fonts.googleapis.com`.
