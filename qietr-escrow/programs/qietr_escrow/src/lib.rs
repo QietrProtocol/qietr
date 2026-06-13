@@ -270,7 +270,11 @@ pub struct CreateJob<'info> {
         token::authority = escrow_vault,
     )]
     pub escrow_vault: Account<'info, TokenAccount>,
-    #[account(mut)]
+    #[account(
+        mut,
+        constraint = client_ata.owner == client.key() @ EscrowError::ClientAtaMismatch,
+        constraint = client_ata.mint == mint.key() @ EscrowError::MintMismatch,
+    )]
     pub client_ata: Account<'info, TokenAccount>,
     #[account(mut)]
     pub client: Signer<'info>,

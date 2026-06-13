@@ -2,15 +2,17 @@
 // verifier.rs — Groth16 verification wrapper.
 //
 // Uses `groth16-solana` (alt-bn128 syscalls) against the program-embedded
-// VERIFYINGKEY const. Public signal order MUST match the circuit's
-// `component main { public [...] }`:
+// VERIFYINGKEY const. Public signal order MUST match snarkjs's witness
+// ordering (signal-declaration order, NOT the `public [...]` list order) —
+// authoritative source is qietr-circuits/build/qietr_payment.sym and
+// lib.rs::withdraw, which both use:
 //
-//   public_signals[0] = nullifierHash
+//   public_signals[0] = amount           (tier value)
 //   public_signals[1] = root
-//   public_signals[2] = recipient
-//   public_signals[3] = paymentAmount
-//   public_signals[4] = changeCommitment
-//   public_signals[5] = amount
+//   public_signals[2] = nullifierHash
+//   public_signals[3] = recipient
+//   public_signals[4] = paymentAmount
+//   public_signals[5] = changeCommitment
 //
 // Each public signal is a 32-byte big-endian BN254 field element.
 // =============================================================================

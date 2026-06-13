@@ -118,7 +118,9 @@ impl GeyserPlugin for QietrIndexerPlugin {
 
         self.pool_program_id = Some(program_id);
         self.component_name = cfg.component_name;
-        self.writer = Some(spawn(pg_pool));
+        self.writer = Some(spawn(pg_pool).map_err(|e| {
+            GeyserPluginError::Custom(format!("spawn writer thread: {}", e).into())
+        })?);
 
         log::info!(
             "qietr-indexer-geyser loaded; program_id={} component={}",
@@ -193,12 +195,19 @@ impl GeyserPlugin for QietrIndexerPlugin {
                     if let Ok(mut cache) = self.leaf_index_cache.write() {
                         cache.insert(tree.denom_id, tree.next_leaf_index);
                     }
-                    writer.enqueue(WriteEvent::UpsertRoot {
-                        denom_id: tree.denom_id as i16,
-                        leaf_count: tree.next_leaf_index as i64,
-                        root_be: tree.latest_root().to_vec(),
-                        inserted_slot: slot as i64,
-                    });
+                    match tree.latest_root() {
+                        Some(root) => writer.enqueue(WriteEvent::UpsertRoot {
+                            denom_id: tree.denom_id as i16,
+                            leaf_count: tree.next_leaf_index as i64,
+                            root_be: root.to_vec(),
+                            inserted_slot: slot as i64,
+                        }),
+                        None => log::warn!(
+                            "qietr-indexer: MerkleTree denom {} has root_cursor {} out of range; skipping root",
+                            tree.denom_id,
+                            tree.root_cursor
+                        ),
+                    }
                 } else {
                     log::warn!("qietr-indexer: failed to decode MerkleTree");
                 }

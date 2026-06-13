@@ -1,0 +1,53 @@
+name: Bug report
+description: Report a non-security bug. For vulnerabilities, see SECURITY.md (email, don't file here).
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not report security vulnerabilities here.** Email security@qietr.com
+        instead — see [SECURITY.md](../blob/main/SECURITY.md).
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - qietr-pool (program)
+        - qietr-escrow / qietr-msg
+        - qietr-circuits
+        - qietr-sdk
+        - qietr-relayer
+        - qietr-indexer
+        - qietr-web
+        - docs / other
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: A clear description of the bug and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+        3. ...
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit / version
+      description: Output of `git rev-parse --short HEAD`, or the release tag.
+    validations:
+      required: true
+  - type: textarea
+    id: env
+    attributes:
+      label: Environment
+      description: OS, Node version, Agave/Anchor versions if relevant.

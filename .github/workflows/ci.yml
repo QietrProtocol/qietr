@@ -175,3 +175,36 @@ jobs:
             qietr-indexer/geyser-plugin/target
           key: ${{ runner.os }}-cargo-geyser-${{ hashFiles('qietr-indexer/geyser-plugin/Cargo.lock') }}
       - run: cargo check
+
+  pool-anchor-test:
+    name: Pool program (anchor build + on-chain test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-pool
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+      # Pinned toolchain — see qietr-pool/README.md. Agave 4.0.2 + anchor-lang
+      # 0.31.1 are the only combination that builds this program.
+      - name: Install Agave (Solana) 4.0.2
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v4.0.2/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+      - name: Install Anchor CLI
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor --tag v0.31.1 anchor-cli --locked || \
+          npm install -g @coral-xyz/anchor-cli@0.31.1
+      - name: Generate a CI keypair
+        run: solana-keygen new --no-bip39-passphrase -s -o "$HOME/.config/solana/id.json"
+      - run: npm ci
+      # `anchor test` spins up a local validator, deploys, and runs the TS suite —
+      # the on-chain coverage the prior cargo-check-only CI was missing (it was
+      # blind to bugs like the InvalidProgramId 3008 account-order regression).
+      - name: anchor test
+        run: anchor test

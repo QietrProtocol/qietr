@@ -27,7 +27,7 @@ qietr-circuits/
 - **Single parameterized circuit** (one ceremony, not four). `amount` is bound to the on-chain tier by the verifier configuration, not hard-coded into separate circuits.
 - **Merkle depth:** 20 (TRD section 3.4).
 - **Curve / hash / proof system:** BN254 / Poseidon / Groth16 (TRD section 2).
-- **Public-signal order:** `[nullifierHash, root, recipient, paymentAmount, changeCommitment]`. Must match the on-chain verifier in `qietr-pool`.
+- **Public-signal order:** `[amount, root, nullifierHash, recipient, paymentAmount, changeCommitment]` — snarkjs orders by signal-declaration order, not the `public [...]` list. Authoritative source is `build/qietr_payment.sym`; must match `lib.rs::withdraw` and `verifier.rs` in `qietr-pool`.
 
 ## Prerequisites
 

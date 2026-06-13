@@ -21,6 +21,14 @@ async function main() {
     },
   });
 
+  // Centralized error handler so an unexpected throw in any route (e.g. a
+  // transient DB error) returns a clean 500 instead of leaking a stack trace
+  // or surfacing as an unhandled rejection that takes down the process.
+  app.setErrorHandler((err, _req, reply) => {
+    app.log.error({ err: err.message }, "unhandled route error");
+    reply.code(500).send({ error: "internal_error" });
+  });
+
   app.get("/health", async () => ({ ok: true }));
 
   await app.register(denominationsRoute);

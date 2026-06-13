@@ -194,6 +194,7 @@ function X402Form() {
   const sdk = useQietrSdk();
   const { signer, connected } = useWalletSigner();
   const [url, setUrl] = useState("");
+  const [maxSpend, setMaxSpend] = useState("1");
   const [passphrase, setPassphrase] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
   const [responseBody, setResponseBody] = useState<string | null>(null);
@@ -221,10 +222,19 @@ function X402Form() {
       return;
     }
 
+    const maxSpendNum = Number(maxSpend);
+    if (!Number.isFinite(maxSpendNum) || maxSpendNum <= 0) {
+      setStatus({ kind: "error", message: "Set a positive max spend (USDC)." });
+      return;
+    }
+    // Mandatory spend ceiling: wrapFetch refuses any 402 asking for more.
+    const maxAmountMicro = BigInt(Math.round(maxSpendNum * 1_000_000));
+
     setStatus({ kind: "submitting" });
     try {
       const wrapped = sdk.wrapFetch(globalThis.fetch.bind(globalThis), {
         feePayer: signer,
+        maxAmountMicro,
       });
       const res = await wrapped(url);
       const body = await res.text();
@@ -261,6 +271,17 @@ function X402Form() {
           style={inputStyle}
         />
       </Field>
+      <Field label="Max spend (USDC)">
+        <input
+          type="number"
+          min="0"
+          step="0.000001"
+          value={maxSpend}
+          onChange={(e) => setMaxSpend(e.target.value)}
+          placeholder="1"
+          style={inputStyle}
+        />
+      </Field>
       <Field label="Note passphrase">
         <input
           type="password"
@@ -277,7 +298,9 @@ function X402Form() {
           margin: "var(--space-2) 0 var(--space-6)",
         }}
       >
-        We call the URL, parse the <code>402 Payment Required</code> response,
+        The endpoint can charge at most your <strong>max spend</strong> — we
+        refuse any <code>402</code> asking for more. We call the URL, parse the{" "}
+        <code>402 Payment Required</code> response,
         match a denomination from your note, and resubmit with an{" "}
         <code>X-PAYMENT</code> header signed by a one-time burner pubkey.
       </p>

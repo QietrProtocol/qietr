@@ -91,9 +91,14 @@ pub struct MerkleTree {
 }
 
 impl MerkleTree {
-    /// Returns the active root (the latest one written via the ring-buffer).
-    pub fn latest_root(&self) -> [u8; 32] {
-        self.root_history[self.root_cursor as usize]
+    /// Returns the active root (the latest one written via the ring-buffer),
+    /// or `None` if `root_cursor` is out of range. The cursor is a `u8` read
+    /// from on-chain data; a corrupt or malicious account could carry a value
+    /// >= ROOT_HISTORY_LEN, and a direct index would panic on the validator's
+    /// banking thread (taking the plugin — and potentially the validator —
+    /// down). `get` makes this a safe, recoverable miss.
+    pub fn latest_root(&self) -> Option<[u8; 32]> {
+        self.root_history.get(self.root_cursor as usize).copied()
     }
 }
 

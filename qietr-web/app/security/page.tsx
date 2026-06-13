@@ -31,12 +31,17 @@ export default function SecurityPage() {
 
       <h2 style={{ fontSize: "1.375rem", marginBottom: "var(--space-4)" }}>Trusted setup</h2>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-4)" }}>
-        Multi-party ceremony with published contributions. Single-party setup
-        acceptable only on devnet and local development.
+        <strong>Current status (devnet):</strong> the live verifier uses a
+        single-contributor <em>development</em> verifying key marked &ldquo;do
+        not deploy.&rdquo; A trapdoor holder could forge proofs, so do not use
+        with funds you can&rsquo;t lose. A multi-party ceremony with published
+        contributions replaces it before any mainnet launch.
       </p>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
-        The verifying key upgrade path includes a 48-hour time-lock, providing
-        protection against admin compromise.
+        The verifying-key upgrade path is gated by a 48-hour time-lock that the
+        <code>withdraw</code> instruction enforces against the on-chain
+        verifying-key hash, providing notice and protection against an admin
+        swapping the circuit.
       </p>
 
       <h2 style={{ fontSize: "1.375rem", marginBottom: "var(--space-4)" }}>Bug bounty</h2>
@@ -47,8 +52,11 @@ export default function SecurityPage() {
 
       <h2 style={{ fontSize: "1.375rem", marginBottom: "var(--space-4)" }}>Sanctions screening</h2>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
-        The relayer includes OFAC sanctions screening at the transaction relay
-        layer. The shielded pool itself is permissionless and non-custodial.
+        The optional gasless relayer can screen a configured sanctions list at
+        the relay layer (fail-closed: it refuses to start if the list can&rsquo;t
+        load). Screening applies only when you route through such a relayer; the
+        shielded pool itself is permissionless and non-custodial, and direct
+        (self-paid) withdrawals do not pass through any relayer.
       </p>
 
       <h2 style={{ fontSize: "1.375rem", marginBottom: "var(--space-4)" }}>User responsibilities</h2>

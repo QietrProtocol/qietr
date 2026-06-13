@@ -22,6 +22,20 @@ interface RootRow {
   root_be: Buffer;
 }
 
+// --- DoS mitigation -----------------------------------------------------------
+// Each request rebuilds the entire Poseidon tree (O(n) hashes). Under load
+// that is a cheap way to pin the API's CPU. Until the tree is maintained
+// incrementally, we memoize computed responses keyed by (denomId, commitment)
+// and invalidate when the tree grows (leafCount changes) or the TTL lapses.
+// Repeated polling for the same proof at the same tree size is then free.
+const PROOF_CACHE_TTL_MS = 10_000;
+interface CachedProof {
+  leafCount: number;
+  expires: number;
+  body: unknown;
+}
+const proofCache = new Map<string, CachedProof>();
+
 export async function merkleProofRoute(app: FastifyInstance): Promise<void> {
   app.get<{ Querystring: MerkleProofQuery }>(
     "/merkle-proof",
@@ -49,6 +63,21 @@ export async function merkleProofRoute(app: FastifyInstance): Promise<void> {
       }
 
       const pool = getPool();
+      const cacheKey = `${denomIdNum}:${commitmentBuf.toString("hex")}`;
+
+      // Cheap COUNT to detect tree growth; far cheaper than rebuilding it.
+      const countRes = await pool.query<{ c: string }>(
+        `SELECT COUNT(*)::bigint AS c FROM commitments WHERE denom_id = $1`,
+        [denomIdNum],
+      );
+      const currentCount = Number(countRes.rows[0]?.c ?? 0);
+
+      const cached = proofCache.get(cacheKey);
+      if (cached && cached.leafCount === currentCount && cached.expires > Date.now()) {
+        reply.header("Cache-Control", `public, max-age=${PROOF_CACHE_TTL_MS / 1000}`);
+        reply.header("X-Cache", "HIT");
+        return reply.send(cached.body);
+      }
 
       const target = await pool.query<{ leaf_index: string }>(
         `SELECT leaf_index
@@ -109,14 +138,23 @@ export async function merkleProofRoute(app: FastifyInstance): Promise<void> {
         }
       }
 
-      return reply.send({
+      const body = {
         denomId: denomIdNum,
         leafIndex: queryIndex,
         leafCount: leaves.length,
         root: bigIntToHexBE32(path.root),
         pathElements: path.pathElements.map(bigIntToHexBE32),
         pathIndices: path.pathIndices,
+      };
+
+      proofCache.set(cacheKey, {
+        leafCount: leaves.length,
+        expires: Date.now() + PROOF_CACHE_TTL_MS,
+        body,
       });
+      reply.header("Cache-Control", `public, max-age=${PROOF_CACHE_TTL_MS / 1000}`);
+      reply.header("X-Cache", "MISS");
+      return reply.send(body);
     },
   );
 }

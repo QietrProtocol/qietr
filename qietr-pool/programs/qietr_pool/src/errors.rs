@@ -28,6 +28,8 @@ pub enum QietrError {
     NonCanonicalAta,
     #[msg("Verifying key upgrade is still time-locked")]
     VkUpgradeLocked,
+    #[msg("Embedded verifying key does not match the timelocked config hash")]
+    VkHashMismatch,
     #[msg("Verifying key upgrade has not been queued")]
     NoPendingUpgrade,
     #[msg("Arithmetic overflow")]

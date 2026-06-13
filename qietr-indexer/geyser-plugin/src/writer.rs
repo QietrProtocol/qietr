@@ -61,16 +61,17 @@ pub struct WriterHandle {
     _worker: thread::JoinHandle<()>,
 }
 
-pub fn spawn(pool: PgPool) -> WriterHandle {
+pub fn spawn(pool: PgPool) -> std::io::Result<WriterHandle> {
     let (tx, rx) = bounded::<WriteEvent>(QUEUE_CAPACITY);
+    // Propagate spawn failure (e.g. resource exhaustion) instead of panicking
+    // inside the validator's plugin-load path.
     let worker = thread::Builder::new()
         .name("qietr-indexer-writer".into())
-        .spawn(move || run_worker(pool, rx))
-        .expect("spawn writer thread");
-    WriterHandle {
+        .spawn(move || run_worker(pool, rx))?;
+    Ok(WriterHandle {
         sender: tx,
         _worker: worker,
-    }
+    })
 }
 
 impl WriterHandle {

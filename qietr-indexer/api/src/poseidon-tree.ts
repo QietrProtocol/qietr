@@ -100,16 +100,27 @@ export function bigIntToHexBE32(n: bigint): string {
   return "0x" + hex;
 }
 
+/** BN254 scalar field prime (Fr). Commitments must be a field element < p. */
+export const BN254_FR =
+  21888242871839275222246405745257275088548364400416034343698204186575808495617n;
+
 /**
  * Parse a commitment query parameter that may be hex (`0x...`) or decimal.
  * Returns big-endian 32-byte Buffer for DB lookup.
+ *
+ * Validates the value is a non-negative field element below the BN254 scalar
+ * prime — otherwise a malformed/negative/oversized input would either throw
+ * deep in `BigInt`/`Buffer` or silently alias another commitment mod p.
  */
 export function parseCommitmentParam(s: string): Buffer {
-  let n: bigint;
-  if (s.startsWith("0x") || s.startsWith("0X")) {
-    n = BigInt(s);
-  } else {
-    n = BigInt(s);
+  const trimmed = s.trim();
+  if (!/^(0[xX][0-9a-fA-F]+|[0-9]+)$/.test(trimmed)) {
+    throw new Error("commitment must be a hex (0x…) or decimal integer string");
+  }
+  const n = BigInt(trimmed);
+  if (n < 0n) throw new Error("commitment must be non-negative");
+  if (n >= BN254_FR) {
+    throw new Error("commitment is not a valid BN254 field element (>= prime)");
   }
   let hex = n.toString(16);
   if (hex.length > 64) throw new Error("commitment exceeds 32 bytes");

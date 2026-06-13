@@ -37,8 +37,17 @@ merchant gets paid and verifies the payment; they learn nothing about the payer.
 |---|---|---|
 | **Payment flow** | Alice → Bob | Pool → Bob |
 | **Linkability** | Everyone sees Alice paid Bob | Bob sees a valid payment, cannot identify Alice |
-| **Privacy set** | None | Every depositor in the pool |
+| **Privacy set** | None | Every same-tier depositor (see caveat below) |
 | **Proof** | — | Groth16 zk-SNARK over BN254 |
+
+> **Privacy caveat (honest disclosure).** The anonymity set is *per denomination tier*
+> (0.1 / 1 / 10 / 100 USDC), not the whole pool — a spend is indistinguishable only
+> among deposits of the same tier. Moreover, a **partial spend** mints a non-tier
+> **change note** into the same tree in the same transaction. An observer can link
+> `spend nullifier X → change leaf created in the same tx`, so the change note and its
+> future lineage are correlatable with that spend. To stay in the full anonymity set,
+> spend a whole denomination (no change) or re-deposit change as a fresh tier note.
+> See [`docs/dev/PRIVACY.md`](docs/dev/PRIVACY.md) for the full model and roadmap.
 
 ## How it works
 

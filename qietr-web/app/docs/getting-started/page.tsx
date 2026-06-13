@@ -149,9 +149,12 @@ export default function GettingStarted() {
 
         <h3 style={{ fontSize: "1.125rem", marginBottom: "var(--space-2)" }}>Deposit vs spending</h3>
         <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
-          Deposits are in fixed denominations for better privacy (larger anonymity sets).
-          Spending is flexible &mdash; pay any amount up to your balance, make multiple
-          payments from one deposit.
+          Deposits are in fixed denominations for better privacy &mdash; your anonymity
+          set is every other deposit of the same tier. Spending is flexible: pay any
+          amount up to your balance and make multiple payments from one deposit. Note
+          that a partial payment creates an on-chain &ldquo;change&rdquo; note linkable
+          to that spend; to stay in the full anonymity set, spend whole denominations
+          or re-deposit change.
         </p>
 
         <h2 id="use-cases" style={{ fontSize: "1.375rem", marginBottom: "var(--space-3)" }}>

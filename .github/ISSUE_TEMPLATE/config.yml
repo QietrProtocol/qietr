@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/QietrCom/qietr/blob/main/SECURITY.md
+    about: Do NOT open a public issue. Email security@qietr.com — see SECURITY.md.
+  - name: Questions & discussion
+    url: https://github.com/QietrCom/qietr/discussions
+    about: For usage questions and ideas, start a discussion.

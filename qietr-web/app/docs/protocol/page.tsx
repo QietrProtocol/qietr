@@ -98,7 +98,7 @@ export default function ProtocolPage() {
           <li>Change commitment correctness</li>
         </ul>
         <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
-          Public signals: <code>[nullifierHash, root, recipient, paymentAmount, changeCommitment, amount]</code>.
+          Public signals: <code>[amount, root, nullifierHash, recipient, paymentAmount, changeCommitment]</code>.
           The <code>amount</code> signal is a Qietr-specific security fix that prevents
           amount inflation attacks by binding the payment to its denomination tier.
         </p>
@@ -107,7 +107,7 @@ export default function ProtocolPage() {
           Smart contracts
         </h2>
         <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-4)" }}>
-          All three programs are deployed and verified on Solana <strong>devnet</strong>.
+          All three programs are deployed on Solana <strong>devnet</strong> (unaudited).
           Upgrade authority: <code style={{ wordBreak: "break-all" }}>GWxyJs7G9FPUY58UTtUSpVwFuXTRdXzneyBcekxmvuR4</code>.
         </p>
         <div style={{ overflowX: "auto", marginBottom: "var(--space-4)" }}>

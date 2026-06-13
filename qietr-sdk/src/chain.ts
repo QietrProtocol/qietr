@@ -28,14 +28,38 @@ export const USDC_MINT_DEVNET = new PublicKey(
   "4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU",
 );
 
-/** $QIET token mint on mainnet (placeholder — deployed at Phase C). */
-export const QIET_MINT_MAINNET = new PublicKey(
-  "11111111111111111111111111111111",
-);
-/** $QIET token mint on devnet (placeholder). */
-export const QIET_MINT_DEVNET = new PublicKey(
-  "11111111111111111111111111111111",
-);
+// -----------------------------------------------------------------------------
+// $QIET token mint — NOT YET MINTED.
+//
+// These are System Program placeholders (all 1s). The $QIET token does not
+// exist on any cluster yet (planned for Phase C). They are exported only so the
+// public surface is stable; do NOT transfer to or quote against them. Use
+// `isQietMintDeployed()` / `requireQietMint()` to guard any code path that
+// touches $QIET so a placeholder can never be mistaken for a live mint.
+// -----------------------------------------------------------------------------
+const QIET_MINT_PLACEHOLDER = "11111111111111111111111111111111";
+
+/** $QIET token mint on mainnet (PLACEHOLDER — not minted). */
+export const QIET_MINT_MAINNET = new PublicKey(QIET_MINT_PLACEHOLDER);
+/** $QIET token mint on devnet (PLACEHOLDER — not minted). */
+export const QIET_MINT_DEVNET = new PublicKey(QIET_MINT_PLACEHOLDER);
+
+/** True once a real $QIET mint replaces the placeholder for `cluster`. */
+export function isQietMintDeployed(cluster: Cluster): boolean {
+  const mint = cluster === "mainnet-beta" ? QIET_MINT_MAINNET : QIET_MINT_DEVNET;
+  return mint.toBase58() !== QIET_MINT_PLACEHOLDER;
+}
+
+/** Return the $QIET mint, or throw if it's still the placeholder. */
+export function requireQietMint(cluster: Cluster): PublicKey {
+  if (!isQietMintDeployed(cluster)) {
+    throw new Error(
+      "$QIET is not minted yet — the mint constant is a System Program placeholder. " +
+        "Do not transfer or quote against it.",
+    );
+  }
+  return cluster === "mainnet-beta" ? QIET_MINT_MAINNET : QIET_MINT_DEVNET;
+}
 
 /** USDC has 6 decimals. */
 export const USDC_DECIMALS = 6;

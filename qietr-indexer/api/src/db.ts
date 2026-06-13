@@ -21,5 +21,11 @@ export function getPool(): pg.Pool {
     max: 10,
     idleTimeoutMillis: 30_000,
   });
+  // An error on an IDLE client (e.g. the DB closed the connection) is emitted
+  // on the pool. Without a listener, Node treats it as an unhandled 'error'
+  // event and crashes the whole process. Log and let the pool recycle.
+  pool.on("error", (err) => {
+    console.error("pg pool: idle client error (recovered):", err.message);
+  });
   return pool;
 }

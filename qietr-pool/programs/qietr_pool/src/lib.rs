@@ -189,17 +189,29 @@ pub mod qietr_pool {
         let tier_amount_field = field_from_u64(ctx.accounts.denomination.amount_micro_usdc);
         require!(amount_field == tier_amount_field, QietrError::AmountMismatch);
 
-        // 5. Verify the Groth16 proof against the program-embedded VK.
+        // 5. Enforce the VK timelock: the program-embedded VERIFYINGKEY must
+        //    match the hash blessed in PoolConfig. The hash can only change via
+        //    queue_vk_upgrade + apply_vk_upgrade (48h timelock), so a program
+        //    redeploy that swaps the VK cannot take effect on withdraws until
+        //    the timelock has elapsed and the new hash is applied. Without this
+        //    check the timelock + verifying_key_hash were decorative — the
+        //    verifier always used the hardcoded const regardless of config.
+        require!(
+            verifier::embedded_vk_hash() == ctx.accounts.config.verifying_key_hash,
+            QietrError::VkHashMismatch
+        );
+
+        // 6. Verify the Groth16 proof against the program-embedded VK.
         verifier::verify(&proof, &public_signals)?;
 
-        // 6. Mark nullifier spent (PDA `init` constraint prevents replay).
+        // 7. Mark nullifier spent (PDA `init` constraint prevents replay).
         let nul = &mut ctx.accounts.nullifier;
         nul.denom_id = denom_id;
         nul.nullifier_hash = nullifier_hash;
         nul.spent_at_slot = Clock::get()?.slot;
         nul.bump = ctx.bumps.nullifier;
 
-        // 7. Decode paymentAmount from the 32-byte BE field element. The
+        // 8. Decode paymentAmount from the 32-byte BE field element. The
         //    circuit constrains it to 64 bits, so the high 24 bytes are zero.
         for i in 0..24 {
             require!(
@@ -211,7 +223,7 @@ pub mod qietr_pool {
         amt_bytes.copy_from_slice(&payment_amount_field[24..32]);
         let payment_amount = u64::from_be_bytes(amt_bytes);
 
-        // 8. Calculate protocol fee and transfer payment to recipient.
+        // 9. Calculate protocol fee and transfer payment to recipient.
         //    If fee_vault is configured, deduct fee_bps from the payment.
         let denom_id_bytes = [denom_id];
         let vault_bump = ctx.accounts.denomination.vault_bump;
@@ -277,7 +289,7 @@ pub mod qietr_pool {
             token::transfer(cpi, payment_amount)?;
         }
 
-        // 9. Append the change commitment to the tree.
+        // 10. Append the change commitment to the tree.
         ctx.accounts.tree.append(change_commitment)?;
 
         Ok(())
