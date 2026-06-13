@@ -54,7 +54,7 @@ import type {
 } from "./types.js";
 import { wrapFetch, type FetchLike } from "./x402.js";
 import { getNoteBalance, hasEnoughBalance } from "./helpers.js";
-import { InvalidNoteError, RelayerError } from "./errors.js";
+import { InvalidNoteError, RelayerError, type X402Error } from "./errors.js";
 import { RelayerClient } from "./relayer-client.js";
 
 // No default indexer URL — consumer MUST provide one via QietrSDKConfig.indexerUrl.
@@ -292,13 +292,27 @@ export class QietrSDK {
   // `to`, return a change commitment in the updated note.
   // -------------------------------------------------------------------------
   async pay(args: PayArgs): Promise<PaymentResult> {
+    const paymentMicro = BigInt(Math.round(args.amount * 10 ** USDC_DECIMALS));
+    return this.payMicroExact(args.to, paymentMicro, args.feePayer);
+  }
+
+  /**
+   * Core pay path. Accepts the amount in micro-USDC as a `bigint` and keeps it
+   * a bigint end-to-end (no float round-trip), so HTTP 402 quotes and x402
+   * settlement preserve exact smallest-unit precision.
+   */
+  private async payMicroExact(
+    to: PublicKey,
+    paymentMicro: bigint,
+    feePayerArg?: SignerLike,
+  ): Promise<PaymentResult> {
     if (!this.note || this.note.commitments.length === 0) {
       throw new Error("no note loaded; call setNote() or deposit() first");
     }
-    const paymentMicro = BigInt(Math.round(args.amount * 10 ** USDC_DECIMALS));
     if (paymentMicro <= 0n) {
       throw new Error("payment amount must be positive");
     }
+    const args = { to, feePayer: feePayerArg };
 
     // Pick the smallest commitment that still covers the payment.
     const sorted = [...this.note.commitments].sort(
@@ -307,7 +321,7 @@ export class QietrSDK {
     const commitment = sorted.find((c) => BigInt(c.amount) >= paymentMicro);
     if (!commitment) {
       throw new Error(
-        `no single commitment large enough for ${args.amount} USDC payment`,
+        `no single commitment large enough for ${paymentMicro} micro-USDC payment`,
       );
     }
 
@@ -361,17 +375,20 @@ export class QietrSDK {
       this.proverPath.zkey,
     );
 
-    // Sanity-check witness ↔ on-chain layout: public_signals[0] must equal
-    // our computed nullifier hash, and [2] must equal pubkeyToField(to).
-    const ps0 = groth.publicSignals[0];
-    const ps2 = groth.publicSignals[2];
-    if (!ps0 || !ps2) {
+    // Sanity-check witness ↔ on-chain layout. Authoritative public-signal
+    // order (from qietr-circuits/build/qietr_payment.sym, matching
+    // lib.rs::withdraw): [0]=amount [1]=root [2]=nullifierHash [3]=recipient
+    // [4]=paymentAmount [5]=changeCommitment. So nullifierHash is index 2 and
+    // recipient is index 3 — NOT [0]/[2] as an earlier revision assumed.
+    const psNullifier = groth.publicSignals[2];
+    const psRecipient = groth.publicSignals[3];
+    if (!psNullifier || !psRecipient) {
       throw new Error("prover returned malformed public signals");
     }
-    if (!bytesEqual(ps0, nullHashBe)) {
+    if (!bytesEqual(psNullifier, nullHashBe)) {
       throw new Error("prover nullifier mismatch; check witness construction");
     }
-    if (!bytesEqual(ps2, pubkeyToField(args.to))) {
+    if (!bytesEqual(psRecipient, pubkeyToField(args.to))) {
       throw new Error("prover recipient mismatch; check pubkey masking");
     }
 
@@ -446,8 +463,29 @@ export class QietrSDK {
   // -------------------------------------------------------------------------
   wrapFetch(
     baseFetch: FetchLike = globalThis.fetch,
-    opts: { feePayer: SignerLike; networkId?: string; maxRetries?: number },
+    opts: {
+      feePayer: SignerLike;
+      /**
+       * MANDATORY per-request spend ceiling in micro-USDC. The wrapper refuses
+       * to pay any 402 asking for more and throws X402AmountExceededError.
+       */
+      maxAmountMicro: bigint;
+      networkId?: string;
+      maxRetries?: number;
+      /** Optional allowlist of acceptable payTo addresses (base58). */
+      payToAllowlist?: ReadonlyArray<string>;
+      defaultTimeoutMs?: number;
+      onError?: (err: X402Error) => void;
+    },
   ): FetchLike {
+    // Default network id derived from the SDK cluster, normalized inside
+    // wrapFetch. mainnet-beta -> "solana", devnet -> "solana-devnet".
+    const clusterNetworkId =
+      this.config.cluster === "devnet"
+        ? "solana-devnet"
+        : this.config.cluster === "localnet"
+          ? "solana-localnet"
+          : "solana";
     return wrapFetch(baseFetch, {
       getNote: () => this.note,
       setNote: (next) => {
@@ -458,26 +496,27 @@ export class QietrSDK {
         return this.payMicro(to, micro, feePayer);
       },
       getFeePayer: () => opts.feePayer,
-      networkId: opts.networkId,
+      networkId: opts.networkId ?? clusterNetworkId,
       maxRetries: opts.maxRetries,
+      maxAmountMicro: opts.maxAmountMicro,
+      payToAllowlist: opts.payToAllowlist,
+      usdcMint: this.usdcMint.toBase58(),
+      defaultTimeoutMs: opts.defaultTimeoutMs,
+      onError: opts.onError,
     });
   }
 
   /**
-   * Lower-level pay path used by wrapFetch. Accepts micro-USDC directly to
-   * preserve precision (HTTP 402 quotes are usually in raw smallest units).
+   * Lower-level pay path used by wrapFetch. Accepts micro-USDC directly and
+   * keeps it a bigint end-to-end — no float round-trip — so HTTP 402 quotes
+   * preserve exact smallest-unit precision.
    */
   async payMicro(
     to: PublicKey,
     paymentMicro: bigint,
     feePayer: SignerLike,
   ): Promise<PaymentResult> {
-    // Reuses the same logic as `pay` but skips float conversion.
-    return this.pay({
-      to,
-      amount: Number(paymentMicro) / 10 ** USDC_DECIMALS,
-      feePayer,
-    });
+    return this.payMicroExact(to, paymentMicro, feePayer);
   }
 
   // -------------------------------------------------------------------------

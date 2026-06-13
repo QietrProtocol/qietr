@@ -14,7 +14,12 @@ export {
   decryptNote,
   isEncryptedNote,
 } from "./note.js";
-export { wrapFetch } from "./x402.js";
+export {
+  wrapFetch,
+  normalizeNetwork,
+  X402_VERSION,
+  SUPPORTED_SCHEMES,
+} from "./x402.js";
 export { PoseidonMerkleTree } from "./merkle.js";
 export { buildWitness, proveGroth16 } from "./prover.js";
 export { commitmentHash, nullifierHash, getPoseidon } from "./hash.js";
@@ -31,6 +36,8 @@ export {
   USDC_MINT_DEVNET,
   QIET_MINT_MAINNET,
   QIET_MINT_DEVNET,
+  isQietMintDeployed,
+  requireQietMint,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   findAssociatedTokenAddress,
   pickTier,
@@ -66,6 +73,13 @@ export {
   NetworkError,
   PaymentRequiredError,
   NullifierSpentError,
+  X402Error,
+  X402MalformedRequirementsError,
+  X402NoMatchingRequirementError,
+  X402AmountExceededError,
+  X402PayToNotAllowedError,
+  X402AssetMismatchError,
+  X402PaymentFailedError,
   formatUSDCAmount,
 } from "./errors.js";
 export { Logger, type LogLevel } from "./logger.js";

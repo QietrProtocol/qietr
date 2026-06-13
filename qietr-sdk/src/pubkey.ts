@@ -3,7 +3,9 @@
 //
 // MUST stay byte-equivalent to `pubkey_to_field` in
 // qietr-pool/programs/qietr_pool/src/lib.rs. Both sides feed the same
-// value into the withdraw circuit's `recipient` public signal (index 2).
+// value into the withdraw circuit's `recipient` public signal (index 3 in
+// the authoritative order [amount, root, nullifierHash, recipient,
+// paymentAmount, changeCommitment] — see qietr_payment.sym).
 // If they diverge, every real withdrawal will fail with RecipientMismatch.
 //
 // On-chain reference:
