@@ -1,0 +1,38 @@
+# Render blueprint for the Qietr indexer (API + poller in one container).
+#
+# Deploy:  Render dashboard → New → Blueprint → pick this repo. Render reads
+# this file, builds qietr-indexer/Dockerfile, and runs serve.mjs (which
+# supervises both the Fastify API on $PORT and the background RPC poller).
+#
+# After the service is created, set the secret env vars in the dashboard
+# (SOLANA_RPC_URL, DATABASE_URL, CORS_ORIGINS) — they're marked sync:false so
+# they are NOT committed here.
+#
+# Free tier note: a free web service sleeps after ~15 min with no inbound
+# request and wakes on the next hit; the poller resumes from its Postgres
+# checkpoint, so indexing catches up automatically.
+
+services:
+  - type: web
+    name: qietr-indexer
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./qietr-indexer/Dockerfile
+    dockerContext: ./qietr-indexer
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # PORT is injected by Render automatically; the API reads process.env.PORT.
+      - key: PGSSL
+        value: require
+      - key: PROGRAM_ID
+        value: 4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib
+      - key: POLL_INTERVAL_MS
+        value: "8000"
+      - key: SOLANA_RPC_URL
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false

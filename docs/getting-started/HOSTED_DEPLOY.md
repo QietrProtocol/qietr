@@ -8,7 +8,7 @@ validator: a small RPC poller drains chain state into Postgres.
 Vercel: qietr-web (static export)  ──/circuits──►  bundled WASM + zkey (same origin)
        │  fetch /merkle-proof, /denominations, /nullifier-status
        ▼
-  Indexer API + poller (Koyeb, one container)
+  Indexer API + poller (Render, one container)
        ▲ reads          │ writes
        │                ▼
        └──────── Neon Postgres
@@ -28,7 +28,7 @@ Vercel: qietr-web (static export)  ──/circuits──►  bundled WASM + zkey
 
 - A **Helius** devnet API key — `https://devnet.helius-rpc.com/?api-key=...`
 - A **Neon** account (free serverless Postgres)
-- A **Koyeb** account (free tier, no credit card) for the indexer service
+- A **Render** account (free tier, no credit card) for the indexer service
 - A **Vercel** account (the web app is already deployed here via the root `vercel.json`)
 - The pool is already deployed on devnet (`4XH6f74UFTvqx4j9UarXGrRZRrAwbnNNsRFBTfNqmWib`)
   and its denominations initialized. Verify with `cd qietr-pool && npx tsx scripts/devnet-smoke.mjs`.
@@ -47,20 +47,21 @@ Vercel: qietr-web (static export)  ──/circuits──►  bundled WASM + zkey
 
 `sslmode=require` makes both the API and poller use TLS automatically.
 
-## 2. Indexer (API + poller) — Koyeb (one free service, no card)
+## 2. Indexer (API + poller) — Render (free web service)
 
-Koyeb's free tier is a single service, so the API and poller run **together**
-in one container: `qietr-indexer/serve.mjs` supervises both children, and
-`qietr-indexer/Dockerfile` builds them. The API serves HTTP on `$PORT` (which
-Koyeb injects and health-checks); the poller drains chain → Postgres in the
-background.
+The API and poller run **together** in one container: `qietr-indexer/serve.mjs`
+supervises both children, and `qietr-indexer/Dockerfile` builds them. The API
+serves HTTP on `$PORT` (which Render injects and health-checks); the poller
+drains chain → Postgres in the background. The repo ships a `render.yaml`
+blueprint so Render configures everything automatically.
 
-**Deploy from the Koyeb dashboard (GitHub):**
+**Deploy from the Render dashboard:**
 
-1. Create → Web Service → GitHub → this repo.
-2. Build: **Dockerfile**, with **Work directory / build context = `qietr-indexer`**
-   (so it picks up `qietr-indexer/Dockerfile`).
-3. Environment variables (mark secrets as secret):
+1. New → **Blueprint** → connect this GitHub repo. Render reads `render.yaml`
+   and proposes a `qietr-indexer` web service on the **free** plan.
+2. Click **Apply**. Render builds `qietr-indexer/Dockerfile`.
+3. Open the service → **Environment** → set the three secret vars (they're
+   `sync:false` in the blueprint, so not committed):
 
    | Variable | Value |
    |---|---|
@@ -68,21 +69,24 @@ background.
    | `DATABASE_URL` | `postgres://...neon.tech/neondb?sslmode=require` (use the **direct**, non-`-pooler` host) |
    | `CORS_ORIGINS` | `https://YOUR-PROJECT.vercel.app` (comma-separate extra origins) |
 
-4. Health check: HTTP `GET /health`. Deploy.
+4. Save → Render redeploys with the secrets. The health check is `GET /health`.
 
-Verify once it's live (replace with your Koyeb URL):
+Verify once it's live (replace with your Render URL):
 
 ```bash
-curl https://YOUR-SERVICE.koyeb.app/health           # {"ok":true}
-curl https://YOUR-SERVICE.koyeb.app/denominations
+curl https://qietr-indexer.onrender.com/health        # {"ok":true}
+curl https://qietr-indexer.onrender.com/denominations
 ```
 
 On first run the poller backfills all history oldest-first, assigning
 `leaf_index` 0,1,2,… — counting **both** deposit commitments and withdraw
 change commitments (both append a leaf on chain) — then tails new ones every 8s.
 
-> **CLI alternative:** `npm i -g @koyeb/cli`, `koyeb login`, then
-> `koyeb service create qietr-indexer --git github.com/QietrProtocol/qietr --git-branch main --git-builder docker --git-docker-dockerfile qietr-indexer/Dockerfile --git-workdir qietr-indexer --env SOLANA_RPC_URL=... --env DATABASE_URL=... --env CORS_ORIGINS=... --ports 4040:http --routes /:4040`.
+> **Free-tier sleep.** A Render free web service sleeps after ~15 min with no
+> inbound request and wakes on the next hit (first request takes ~30s). The
+> poller resumes from its Postgres checkpoint on wake, so indexing catches up
+> automatically — fine for a devnet demo. For always-on real-time polling,
+> upgrade the service to a paid instance.
 
 > Set `CORS_ORIGINS` to your exact web origin(s). Leave unset (or `*`) to allow
 > any origin — acceptable for this read-only, public-data API.
@@ -101,7 +105,7 @@ You only need to set the **environment variables** in the Vercel project
 |---|---|
 | `NEXT_PUBLIC_QIETR_CLUSTER` | `devnet` |
 | `NEXT_PUBLIC_QIETR_RPC_URL` | `https://devnet.helius-rpc.com/?api-key=YOUR_KEY` |
-| `NEXT_PUBLIC_QIETR_INDEXER_URL` | `https://YOUR-SERVICE.koyeb.app` |
+| `NEXT_PUBLIC_QIETR_INDEXER_URL` | `https://qietr-indexer.onrender.com` |
 | `NEXT_PUBLIC_QIETR_PROVER_PATH` | `/circuits` |
 | `NEXT_PUBLIC_QIETR_RELAYER_URL` | *(optional — only if you deploy the relayer)* |
 
@@ -111,7 +115,7 @@ You only need to set the **environment variables** in the Vercel project
 ### Important: CSP `connect-src`
 
 `vercel.json` ships a Content-Security-Policy. Its `connect-src` already allows
-`*.helius-rpc.com`, `*.solana.com`, `*.koyeb.app`, and `*.vercel.app`. If your
+`*.helius-rpc.com`, `*.solana.com`, `*.onrender.com`, and `*.vercel.app`. If your
 indexer/relayer/RPC live on **other** domains (e.g. a custom domain), edit that
 list in `vercel.json` before deploying or the browser will block the fetch.
 
@@ -139,5 +143,5 @@ list in `vercel.json` before deploying or the browser will block the fetch.
 
 ## Cost
 
-Neon free tier + one Koyeb free service (API + poller) + Vercel Hobby tier.
-Effectively $0 for devnet traffic, no credit card.
+Neon free tier + one Render free web service (API + poller) + Vercel Hobby
+tier. Effectively $0 for devnet traffic, no credit card.
