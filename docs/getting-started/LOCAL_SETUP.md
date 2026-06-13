@@ -111,6 +111,18 @@ The geyser plugin is loaded by a validator via its config JSON
 (`--geyser-plugin-config`). For local indexing you need a validator running the
 plugin against your pool program; see `qietr-indexer/geyser-plugin/README.md`.
 
+**No validator? Use the RPC poller instead.** `qietr-indexer/poller` ingests the
+same Postgres rows over a plain RPC endpoint (no `.so`, no validator) — ideal
+against devnet/Helius. It's also what the hosted deploy uses:
+
+```bash
+cd qietr-indexer/poller && npm ci
+SOLANA_RPC_URL=https://api.devnet.solana.com DATABASE_URL=... npm start
+```
+
+For a public Cloudflare + Fly + Neon deployment, see
+[`HOSTED_DEPLOY.md`](./HOSTED_DEPLOY.md).
+
 ## 6. One end-to-end check (devnet)
 
 The pool ships a scripted deposit → pay → withdraw against devnet:

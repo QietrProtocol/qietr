@@ -1,0 +1,10 @@
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+**/*.log
+geyser-plugin
+poller/test
+db
+docker-compose.yml
+*.md

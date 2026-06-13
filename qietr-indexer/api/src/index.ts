@@ -6,6 +6,7 @@
 // =============================================================================
 
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 
 import { denominationsRoute } from "./routes/denominations.js";
 import { merkleProofRoute } from "./routes/merkle-proof.js";
@@ -14,11 +15,26 @@ import { nullifierStatusRoute } from "./routes/nullifier-status.js";
 const PORT = Number(process.env.PORT ?? 4040);
 const HOST = process.env.HOST ?? "0.0.0.0";
 
+// The browser SDK calls this API cross-origin from the web app's domain, so
+// CORS must allow it. CORS_ORIGINS is a comma-separated allow-list (e.g.
+// "https://qietr.com,https://qietr.pages.dev"); unset or "*" allows any
+// origin, which is fine for a read-only, public-data API on devnet.
+function corsOrigin(): true | string[] {
+  const raw = (process.env.CORS_ORIGINS ?? "*").trim();
+  if (raw === "" || raw === "*") return true;
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
 async function main() {
   const app = Fastify({
     logger: {
       level: process.env.LOG_LEVEL ?? "info",
     },
+  });
+
+  await app.register(cors, {
+    origin: corsOrigin(),
+    methods: ["GET"],
   });
 
   // Centralized error handler so an unexpected throw in any route (e.g. a

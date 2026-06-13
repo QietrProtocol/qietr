@@ -5,6 +5,7 @@
 // =============================================================================
 
 import pg from "pg";
+import { resolveSsl } from "./ssl.js";
 
 const { Pool } = pg;
 
@@ -18,6 +19,7 @@ export function getPool(): pg.Pool {
   }
   pool = new Pool({
     connectionString,
+    ssl: resolveSsl(connectionString),
     max: 10,
     idleTimeoutMillis: 30_000,
   });
