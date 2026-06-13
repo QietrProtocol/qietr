@@ -74,8 +74,10 @@ export default function HomePage() {
             margin: "0 0 var(--space-6)",
           }}
         >
-          Zero-knowledge privacy layer for HTTP 402 micropayments on Solana.
-          Pay any endpoint in USDC without revealing identity. Open source, open standards.
+          A zero-knowledge privacy layer for HTTP 402 (x402) micropayments on
+          Solana. AI agents pay any endpoint in USDC by proving they own a
+          deposit &mdash; without revealing identity, history, or balance.
+          Open source, open standards.
         </p>
         <div style={{ display: "flex", gap: "var(--space-4)", marginBottom: "var(--space-4)" }}>
           <Link
@@ -106,7 +108,7 @@ export default function HomePage() {
           </Link>
         </div>
         <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", margin: 0 }}>
-          Built on Solana. Open source. Audit before mainnet.
+          Live on Solana devnet &middot; not yet audited &middot; not on mainnet.
         </p>
       </section>
 
@@ -174,8 +176,9 @@ const payment = await sdk.pay({
               Shielded Payments
             </h3>
             <p style={{ color: "var(--text-secondary)", margin: 0 }}>
-              Unlinkable USDC payments for AI agents that keep browsing patterns
-              confidential while staying compliant. Our first product.
+              Unlinkable USDC payments for AI agents over the x402 rail. A
+              Groth16 zk-SNARK proves a deposit is yours without revealing
+              which one. The core protocol.
             </p>
           </Card>
           <Card>
@@ -183,17 +186,17 @@ const payment = await sdk.pay({
               Agent Messaging
             </h3>
             <p style={{ color: "var(--text-secondary)", margin: 0 }}>
-              Encrypted on-chain messaging for autonomous agents. Coming after
-              shielded payments reach mainnet.
+              Encrypted on-chain messaging for autonomous agents, built on the
+              same primitives. Live on devnet alongside the pool.
             </p>
           </Card>
           <Card>
             <h3 style={{ fontSize: "1.125rem", marginBottom: "var(--space-3)" }}>
-              Open Source
+              Job Escrow
             </h3>
             <p style={{ color: "var(--text-secondary)", margin: 0 }}>
-              All Qietr protocols are open source. Built by the community,
-              for the community. MIT license.
+              Trust-minimized escrow for agent commerce, with an on-chain
+              dispute and refund lifecycle. Live on devnet.
             </p>
           </Card>
         </div>
@@ -249,11 +252,12 @@ const payment = await sdk.pay({
         </div>
       </section>
 
-      {/* Features grid */}
+      {/* Use cases grid */}
       <section style={sectionStyle}>
-        <h2 style={sectionTitleStyle}>Privacy for every agent interaction</h2>
+        <h2 style={sectionTitleStyle}>What private payments unlock</h2>
         <p style={sectionSubtitleStyle}>
-          Protecting agent privacy across payments, data, and beyond.
+          One shielded pool, many use cases. Every payment below settles in
+          USDC with no link back to the payer.
         </p>
         <div
           style={{
@@ -264,38 +268,38 @@ const payment = await sdk.pay({
         >
           <Card>
             <h3 style={{ fontSize: "1rem", marginBottom: "var(--space-2)" }}>
-              Private Payments
+              Paid APIs &amp; tools
             </h3>
             <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>
-              Agents pay for services without revealing browsing patterns or
-              creating linkable payment trails.
+              Agents pay per-call for APIs and tools without creating a
+              linkable trail of which endpoints they use.
             </p>
           </Card>
           <Card>
             <h3 style={{ fontSize: "1rem", marginBottom: "var(--space-2)" }}>
-              Confidential API Access
+              Metered data &amp; content
             </h3>
             <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>
-              Access sensitive data and APIs while protecting query patterns
-              and usage behavior from profiling.
+              Pay-per-request access to data feeds and content behind an x402
+              paywall, without exposing query patterns.
             </p>
           </Card>
           <Card>
             <h3 style={{ fontSize: "1rem", marginBottom: "var(--space-2)" }}>
-              Anonymous Compute
+              Compute &amp; inference
             </h3>
             <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>
-              Purchase compute resources without revealing workload types
-              or model architectures.
+              Buy compute and model inference by the unit, unlinked from the
+              wallet funding the workload.
             </p>
           </Card>
           <Card>
             <h3 style={{ fontSize: "1rem", marginBottom: "var(--space-2)" }}>
-              Privacy-First Infrastructure
+              Agent-to-agent commerce
             </h3>
             <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.875rem" }}>
-              Building the foundation for agent privacy across every
-              interaction type on Solana.
+              Settle jobs between agents through escrow, with encrypted
+              messaging on the same primitives.
             </p>
           </Card>
         </div>

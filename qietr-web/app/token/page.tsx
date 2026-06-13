@@ -30,9 +30,26 @@ export default function TokenPage() {
       <h1 style={{ fontSize: "1.875rem", marginBottom: "var(--space-3)" }}>
         $QIET Token
       </h1>
+      <div
+        style={{
+          background: "var(--surface-1)",
+          border: "1px solid var(--border-strong)",
+          borderRadius: "var(--radius-base)",
+          padding: "var(--space-3) var(--space-4)",
+          marginBottom: "var(--space-6)",
+          fontSize: "0.9375rem",
+        }}
+      >
+        <strong>Not minted yet.</strong>{" "}
+        <span style={{ color: "var(--text-secondary)" }}>
+          $QIET does not exist on any chain today. The design below is the
+          published plan &mdash; all numbers are provisional until the token
+          generation event. Beware of impostor tokens.
+        </span>
+      </div>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
-        Protocol token of the Qietr network. Revenue share, governance, and fee
-        discounts. Final numbers decided before token generation event.
+        Planned protocol token of the Qietr network. Revenue share, governance,
+        and fee discounts. Final numbers decided before token generation event.
       </p>
 
       {/* Supply */}
