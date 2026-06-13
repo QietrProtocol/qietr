@@ -4,6 +4,8 @@ import type { RelayerConfig } from "../config.js";
 import type { KoraClient } from "../kora.js";
 import type { RateLimiter } from "../policy/rate-limit.js";
 import type { SanctionsList } from "../policy/sanctions.js";
+import type { ReplayGuard } from "../policy/replay-guard.js";
+import type { SpendGuard } from "../policy/spend-guard.js";
 import {
   ValidationError,
   decodeAndValidateWithdraw,
@@ -17,6 +19,8 @@ export interface SubmitDeps {
   ipLimiter: RateLimiter;
   recipientLimiter: RateLimiter;
   sanctions: SanctionsList;
+  spendGuard: SpendGuard;
+  replayGuard: ReplayGuard;
 }
 
 interface SubmitBody {
@@ -49,6 +53,11 @@ export async function submitRoute(
         error: "missing_param",
         required: ["tx_base64"],
       });
+    }
+
+    // Step 1b: replay defense — reject the same tx within the TTL window.
+    if (!deps.replayGuard.admit(tx_base64)) {
+      return reply.code(409).send({ error: "replayed_tx" });
     }
 
     // Step 2: decode and structurally validate the tx.
@@ -119,10 +128,18 @@ export async function submitRoute(
       });
     }
 
-    // Step 6: forward to backend (Kora or direct RPC).
+    // Step 6: economic guard — confirm the relayer can afford the fee and is
+    // within its per-window spend cap before paying SOL to forward.
+    const spend = await deps.spendGuard.check();
+    if (!spend.allowed) {
+      return reply.code(503).send({ error: spend.reason ?? "relayer_unavailable" });
+    }
+
+    // Step 7: forward to backend (Kora or direct RPC).
     let signature: string;
     try {
       signature = await deps.kora.sendTransaction(tx_base64);
+      deps.spendGuard.commit();
     } catch (e) {
       const msg = (e as Error).message;
       // Surface program errors verbatim so the SDK can map them, but keep

@@ -122,6 +122,29 @@ export interface ValidatedDepositTx {
   denomId: number;
   /** The depositor (sender of USDC). */
   depositor: PublicKey;
+  /** Fee amount (micro-USDC) the depositor is paying the relayer. */
+  feeAmountMicro: bigint;
+  /** Destination ATA of the fee transfer (must be the relayer's fee ATA). */
+  feeDestination: PublicKey;
+}
+
+/** Economic expectations the relayer enforces on a gasless deposit. */
+export interface DepositFeeExpectation {
+  /** The relayer's fee-collection ATA. The transfer MUST land here. */
+  feeAta: PublicKey;
+  /** Minimum fee (micro-USDC) the relayer will accept. */
+  minFeeMicro: bigint;
+}
+
+/** SPL Token `Transfer` ix data layout: tag(1) | amount(8, LE u64). */
+function decodeSplTransferAmount(data: Buffer): bigint {
+  if (data.length < 9) {
+    throw new ValidationError(
+      "transfer_data_too_short",
+      `expected >=9 bytes, got ${data.length}`,
+    );
+  }
+  return data.readBigUInt64LE(1);
 }
 
 /**
@@ -133,11 +156,17 @@ export interface ValidatedDepositTx {
  *
  * The TX must have `feePayer` set to the relayer's pubkey, and exactly one
  * signing party (the depositor). The relayer will add its own signature.
+ *
+ * When `fee` is provided, the relayer ALSO verifies the SPL transfer actually
+ * pays it: destination == fee.feeAta and amount >= fee.minFeeMicro. Without
+ * this the relayer signs (and pays SOL for) deposits that route the fee
+ * elsewhere or pay nothing — a direct economic drain.
  */
 export function decodeAndValidateDeposit(
   txBase64: string,
   programId: PublicKey,
   expectedFeePayer: PublicKey,
+  fee?: DepositFeeExpectation,
 ): ValidatedDepositTx {
   let tx: Transaction;
   try {
@@ -175,6 +204,34 @@ export function decodeAndValidateDeposit(
       "ix0_not_transfer",
       `expected Transfer tag (3), got ${transferIx.data[0]}`,
     );
+  }
+
+  // SPL Transfer accounts: source(0), destination(1), authority(2).
+  const TRANSFER_DEST_INDEX = 1;
+  const destMeta = transferIx.keys[TRANSFER_DEST_INDEX];
+  if (!destMeta) {
+    throw new ValidationError(
+      "missing_fee_destination",
+      `transfer account index ${TRANSFER_DEST_INDEX} not present`,
+    );
+  }
+  const feeDestination = destMeta.pubkey;
+  const feeAmountMicro = decodeSplTransferAmount(transferIx.data as Buffer);
+
+  // Economic check: the relayer must actually be paid its fee.
+  if (fee) {
+    if (!feeDestination.equals(fee.feeAta)) {
+      throw new ValidationError(
+        "fee_to_wrong_destination",
+        `fee transfer destination ${feeDestination.toBase58()} is not the relayer fee ATA ${fee.feeAta.toBase58()}`,
+      );
+    }
+    if (feeAmountMicro < fee.minFeeMicro) {
+      throw new ValidationError(
+        "fee_too_low",
+        `fee ${feeAmountMicro} < minimum ${fee.minFeeMicro}`,
+      );
+    }
   }
 
   // Second instruction must be pool deposit.
@@ -217,6 +274,8 @@ export function decodeAndValidateDeposit(
     tx,
     denomId,
     depositor: acctMeta.pubkey,
+    feeAmountMicro,
+    feeDestination,
   };
 }
 

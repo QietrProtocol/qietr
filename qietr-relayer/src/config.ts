@@ -30,6 +30,15 @@ export interface RelayerConfig {
   denomTiers: { denomId: number; amountMicroUsdc: bigint }[];
   /** Fee bps charged per withdraw, surfaced on /quote. */
   feeBps: number;
+  /** Refuse to forward when the fee-payer SOL balance drops below this (lamports). */
+  minBalanceLamports: number;
+  /** Per-window cap on forwarded (SOL-spending) txs across all callers. */
+  maxTxPerWindow: number;
+  spendWindowSeconds: number;
+  /** TTL for the replay guard (seconds). Must exceed blockhash validity. */
+  replayTtlSeconds: number;
+  /** Trust X-Forwarded-For (set true behind a proxy/CDN so req.ip is the client). */
+  trustProxy: boolean;
 }
 
 const DEFAULT_TIERS = JSON.stringify([
@@ -90,6 +99,12 @@ export function loadConfig(): RelayerConfig {
       amountMicroUsdc: BigInt(t.amountMicroUsdc),
     })),
     feeBps: Number(process.env.FEE_BPS ?? 50), // 0.5% default; on-chain config wins
+    // ~0.05 SOL floor by default; below this the relayer stops forwarding.
+    minBalanceLamports: Number(process.env.MIN_BALANCE_LAMPORTS ?? 50_000_000),
+    maxTxPerWindow: Number(process.env.MAX_TX_PER_WINDOW ?? 200),
+    spendWindowSeconds: Number(process.env.SPEND_WINDOW_SECONDS ?? 60),
+    replayTtlSeconds: Number(process.env.REPLAY_TTL_SECONDS ?? 120),
+    trustProxy: (process.env.TRUST_PROXY ?? "false").toLowerCase() === "true",
   };
   if (process.env.API_KEY) cfg.apiKey = process.env.API_KEY;
   if (process.env.FEE_ATA) cfg.feeAta = new PublicKey(process.env.FEE_ATA);

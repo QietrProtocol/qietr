@@ -3,6 +3,8 @@ import type { RelayerConfig } from "../config.js";
 import type { KoraClient } from "../kora.js";
 import type { RateLimiter } from "../policy/rate-limit.js";
 import type { SanctionsList } from "../policy/sanctions.js";
+import type { ReplayGuard } from "../policy/replay-guard.js";
+import type { SpendGuard } from "../policy/spend-guard.js";
 import {
   ValidationError,
   decodeAndValidateDeposit,
@@ -13,6 +15,8 @@ export interface SubmitDepositDeps {
   kora: KoraClient;
   ipLimiter: RateLimiter;
   sanctions: SanctionsList;
+  spendGuard: SpendGuard;
+  replayGuard: ReplayGuard;
 }
 
 interface SubmitDepositBody {
@@ -47,13 +51,25 @@ export async function submitDepositRoute(
       });
     }
 
-    // Step 2: decode and validate the deposit tx.
+    // Step 1b: replay defense.
+    if (!deps.replayGuard.admit(tx_base64)) {
+      return reply.code(409).send({ error: "replayed_tx" });
+    }
+
+    // Step 2: decode and validate the deposit tx, including the economic
+    // check that the relayer's fee ATA is actually paid at least the minimum.
     let validated;
     try {
       validated = decodeAndValidateDeposit(
         tx_base64,
         deps.config.programId,
         deps.config.feePayer.publicKey,
+        deps.config.feeAta
+          ? {
+              feeAta: deps.config.feeAta,
+              minFeeMicro: BigInt(deps.config.feeAmountMicro),
+            }
+          : undefined,
       );
     } catch (e) {
       if (e instanceof ValidationError) {
@@ -71,10 +87,17 @@ export async function submitDepositRoute(
       });
     }
 
-    // Step 4: sign with feePayer and forward to backend.
+    // Step 4: economic guard — balance floor + per-window cap.
+    const spend = await deps.spendGuard.check();
+    if (!spend.allowed) {
+      return reply.code(503).send({ error: spend.reason ?? "relayer_unavailable" });
+    }
+
+    // Step 5: sign with feePayer and forward to backend.
     let signature: string;
     try {
       signature = await deps.kora.sendTransaction(tx_base64);
+      deps.spendGuard.commit();
     } catch (e) {
       const msg = (e as Error).message;
       if (msg.toLowerCase().includes("rpc")) {

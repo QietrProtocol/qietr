@@ -12,6 +12,29 @@
 
 import { Connection, Keypair, Transaction } from "@solana/web3.js";
 
+/** Default outbound timeout for upstream Kora calls. */
+const KORA_TIMEOUT_MS = 15_000;
+
+/** fetch() with an AbortSignal timeout so a hung upstream can't wedge us. */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit,
+  timeoutMs: number,
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } catch (e) {
+    if (controller.signal.aborted) {
+      throw new Error(`kora request timed out after ${timeoutMs}ms`);
+    }
+    throw e;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export interface KoraClient {
   /** Forward a base64-encoded transaction. Returns the on-chain signature. */
   sendTransaction(txBase64: string): Promise<string>;
@@ -86,11 +109,15 @@ export function createKoraJsonRpcClient(
         method,
         params: { transaction: txBase64, encoding: "base64" },
       };
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      const res = await fetchWithTimeout(
+        url,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(body),
+        },
+        KORA_TIMEOUT_MS,
+      );
       if (!res.ok) {
         throw new Error(`kora ${res.status}: ${await res.text()}`);
       }
@@ -105,7 +132,7 @@ export function createKoraJsonRpcClient(
     },
     async ping(): Promise<boolean> {
       try {
-        const res = await fetch(url, { method: "GET" });
+        const res = await fetchWithTimeout(url, { method: "GET" }, KORA_TIMEOUT_MS);
         return res.ok;
       } catch {
         return false;

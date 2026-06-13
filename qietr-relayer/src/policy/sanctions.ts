@@ -18,15 +18,30 @@ export interface SanctionsList {
 
 const COMMENT_PREFIX = "#";
 
+const SANCTIONS_TIMEOUT_MS = 15_000;
+
 async function loadSource(source: string): Promise<string> {
   if (source.startsWith("http://") || source.startsWith("https://")) {
-    const res = await fetch(source);
-    if (!res.ok) {
-      throw new Error(
-        `sanctions list fetch failed: ${res.status} ${res.statusText}`,
-      );
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), SANCTIONS_TIMEOUT_MS);
+    try {
+      const res = await fetch(source, { signal: controller.signal });
+      if (!res.ok) {
+        throw new Error(
+          `sanctions list fetch failed: ${res.status} ${res.statusText}`,
+        );
+      }
+      return await res.text();
+    } catch (e) {
+      if (controller.signal.aborted) {
+        throw new Error(
+          `sanctions list fetch timed out after ${SANCTIONS_TIMEOUT_MS}ms`,
+        );
+      }
+      throw e;
+    } finally {
+      clearTimeout(timer);
     }
-    return res.text();
   }
   return readFile(source, "utf-8");
 }
