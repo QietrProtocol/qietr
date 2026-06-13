@@ -1,5 +1,5 @@
-import { Banner } from "../../_components/Banner";
 import { Card } from "../../_components/Card";
+import { DepositBanner } from "./DepositBanner";
 import { TierPicker } from "./TierPicker";
 
 export default function DepositPage() {
@@ -16,12 +16,7 @@ export default function DepositPage() {
         Step 1 of 3 — Choose denomination
       </p>
 
-      <Banner tone="warning">
-        The pool program is live on Solana devnet. This hosted UI is a preview
-        and needs a configured indexer and prover to submit a real deposit — run
-        it locally with those set, or use the SDK directly. Devnet only; not
-        audited.
-      </Banner>
+      <DepositBanner />
 
       <div style={{ height: "var(--space-6)" }} />
 
