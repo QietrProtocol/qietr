@@ -1,3 +1,7 @@
+import { CopyableCA } from "../_components/CopyableCA";
+
+const QIET_CA = "MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump";
+
 const tableStyle: React.CSSProperties = {
   width: "100%",
   borderCollapse: "collapse",
@@ -43,11 +47,9 @@ export default function TokenPage() {
         <strong>$QIET is live.</strong>{" "}
         <span style={{ color: "var(--text-secondary)" }}>
           The only official contract address is{" "}
-          <code style={{ wordBreak: "break-all" }}>
-            MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump
-          </code>
-          . Verify it before buying &mdash; beware of impostor tokens. Numbers
-          below remain provisional until finalized.
+          <CopyableCA address={QIET_CA} />. Verify it before buying &mdash;
+          beware of impostor tokens. Numbers below remain provisional until
+          finalized.
         </span>
       </div>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
@@ -168,9 +170,7 @@ export default function TokenPage() {
       >
         <p style={{ margin: 0, fontSize: "0.9375rem" }}>
           <strong>Contract address:</strong>{" "}
-          <code style={{ wordBreak: "break-all" }}>
-            MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump
-          </code>
+          <CopyableCA address={QIET_CA} />
         </p>
       </div>
 
