@@ -87,34 +87,16 @@ export default function TokenPage() {
           </thead>
           <tbody>
             <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Community / users</td>
-              <td style={tdStyle}>50%</td>
-              <td style={tdStyle}>500,000,000</td>
-              <td style={tdStyle}>Public launch + ongoing emissions</td>
+              <td style={{ ...tdStyle, fontWeight: 500 }}>Public</td>
+              <td style={tdStyle}>90%</td>
+              <td style={tdStyle}>900,000,000</td>
+              <td style={tdStyle}>Open to buy. No investor, no insider allocation.</td>
             </tr>
             <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Core team</td>
-              <td style={tdStyle}>18%</td>
-              <td style={tdStyle}>180,000,000</td>
+              <td style={{ ...tdStyle, fontWeight: 500 }}>Team</td>
+              <td style={tdStyle}>10%</td>
+              <td style={tdStyle}>100,000,000</td>
               <td style={tdStyle}>Vested</td>
-            </tr>
-            <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Ecosystem / integrations</td>
-              <td style={tdStyle}>12%</td>
-              <td style={tdStyle}>120,000,000</td>
-              <td style={tdStyle}>Grants to integrators, audit partners</td>
-            </tr>
-            <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Treasury</td>
-              <td style={tdStyle}>12%</td>
-              <td style={tdStyle}>120,000,000</td>
-              <td style={tdStyle}>Multisig &rarr; on-chain governance</td>
-            </tr>
-            <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Strategic backers</td>
-              <td style={tdStyle}>8%</td>
-              <td style={tdStyle}>80,000,000</td>
-              <td style={tdStyle}>May be reduced or eliminated</td>
             </tr>
           </tbody>
         </table>
@@ -137,24 +119,6 @@ export default function TokenPage() {
               <td style={{ ...tdStyle, fontWeight: 500 }}>Team</td>
               <td style={tdStyle}>12 months</td>
               <td style={tdStyle}>24 months</td>
-              <td style={tdStyle}>36 months</td>
-            </tr>
-            <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Backers</td>
-              <td style={tdStyle}>12 months</td>
-              <td style={tdStyle}>24 months</td>
-              <td style={tdStyle}>36 months</td>
-            </tr>
-            <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Ecosystem</td>
-              <td style={tdStyle}>0 months</td>
-              <td style={tdStyle}>24 months</td>
-              <td style={tdStyle}>24 months</td>
-            </tr>
-            <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Treasury</td>
-              <td style={tdStyle}>0 months</td>
-              <td style={tdStyle}>36 months</td>
               <td style={tdStyle}>36 months</td>
             </tr>
           </tbody>
