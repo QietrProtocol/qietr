@@ -65,7 +65,7 @@ export default function GettingStarted() {
           }}
         >
           <p style={{ margin: "0 0 var(--space-2)", fontFamily: "var(--font-mono)", fontSize: "0.875rem" }}>
-            <span style={{ color: "var(--text-secondary)" }}>// Standard x402 &mdash; Alice&apos;s wallet &rarr; Bob&apos;s address</span>
+            <span style={{ color: "var(--text-secondary)" }}>{`// Standard x402 — Alice's wallet → Bob's address`}</span>
           </p>
           <p style={{ margin: 0, fontFamily: "var(--font-mono)", fontSize: "0.875rem", color: "var(--text-secondary)" }}>
             {`// Everyone can see Alice paid Bob`}
@@ -93,7 +93,7 @@ export default function GettingStarted() {
           }}
         >
           <p style={{ margin: "0 0 var(--space-2)", fontFamily: "var(--font-mono)", fontSize: "0.875rem" }}>
-            <span style={{ color: "var(--text-secondary)" }}>// Qietr &mdash; Shielded Pool &rarr; Bob&apos;s address</span>
+            <span style={{ color: "var(--text-secondary)" }}>{`// Qietr — Shielded Pool → Bob's address`}</span>
           </p>
           <p style={{ margin: 0, fontFamily: "var(--font-mono)", fontSize: "0.875rem", color: "var(--text-secondary)" }}>
             {`// Bob gets paid, can't identify who paid`}

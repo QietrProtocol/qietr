@@ -12,7 +12,7 @@ export default function NotePage() {
       <h1 style={{ fontSize: "1.875rem", marginBottom: "var(--space-2)" }}>Note manager</h1>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
         Notes are AES-256-GCM encrypted with an Argon2id-derived key. The
-        encrypted blob lives in this browser's local storage; the decrypted
+        encrypted blob lives in this browser&apos;s local storage; the decrypted
         form lives only in memory while you have it unlocked.
       </p>
 

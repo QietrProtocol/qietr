@@ -20,7 +20,12 @@ const VKEY_JSON = path.join(CIRCUITS_ROOT, "keys", "qietr_payment_dev_vk.json");
 
 const TIER = 10_000_000n;
 
-describe("sdk prover", () => {
+// This is an end-to-end prover test that needs the compiled circuit + dev keys
+// from qietr-circuits (gitignored build artifacts). They exist after running the
+// circuit build locally, but not in a fresh CI checkout — skip cleanly there.
+const ARTIFACTS_PRESENT = [WASM, ZKEY, VKEY_JSON].every((p) => fs.existsSync(p));
+
+describe("sdk prover", { skip: ARTIFACTS_PRESENT ? false : "circuit artifacts not built" }, () => {
   it("builds a witness, proves, and verifies against the dev VK", async () => {
     const poseidon = await buildPoseidon();
     const F = poseidon.F;

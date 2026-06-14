@@ -9,7 +9,7 @@ export default function BrandPage() {
     >
       <h1 style={{ fontSize: "1.875rem", marginBottom: "var(--space-6)" }}>Brand</h1>
       <p>
-        Name: <strong>Qietr</strong> (pronounced "kwite-er").
+        Name: <strong>Qietr</strong> (pronounced &ldquo;kwite-er&rdquo;).
         <br />
         Token ticker: <code>$QIET</code>.
         <br />
