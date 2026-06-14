@@ -8,7 +8,13 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  RUSTFLAGS: -D warnings
+  # NOTE: we deliberately do NOT set `RUSTFLAGS: -D warnings` here. As a global
+  # env it applies to every cargo invocation — including third-party deps and the
+  # `cargo install anchor-cli` step — overriding cargo's default `--cap-lints
+  # allow` for dependencies. New rustc lints (unexpected_cfgs from Anchor's
+  # `#[program]` macro, mismatched_lifetime_syntaxes in solana crates) then turn
+  # routine warnings into hard build failures on every push. Keep warnings as
+  # warnings; enforce lints on our own code via clippy if/when we add it.
 
 jobs:
   sdk:

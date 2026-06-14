@@ -8,7 +8,7 @@
     "compile": "bash scripts/compile.sh",
     "setup:dev": "bash scripts/setup-dev.sh",
     "export-vk": "bash scripts/export-vk.sh",
-    "test": "node --test --test-timeout=600000 \"test/**/*.test.js\"",
+    "test": "node --test --test-timeout=600000 test/*.test.js",
     "clean": "rm -rf build keys ptau"
   },
   "devDependencies": {
