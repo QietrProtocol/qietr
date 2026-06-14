@@ -1,0 +1,74 @@
+name: Integration (on-chain)
+
+# Heavy end-to-end on-chain test: builds the circuit + dev keys, builds the
+# SDK, builds the qietr_pool program with the pinned platform-tools, spins up
+# a local validator, and runs the Anchor TS suite. This catches on-chain
+# regressions the per-push cargo-check is blind to (e.g. the InvalidProgramId
+# 3008 account-order bug). It is ~15-20 min and installs anchor-cli from
+# source, so it runs nightly and on demand rather than on every push.
+
+on:
+  schedule:
+    # 03:17 UTC nightly (off the top of the hour to dodge the cron stampede).
+    - cron: "17 3 * * *"
+  workflow_dispatch: {}
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  pool-anchor-test:
+    name: Pool program (anchor build + on-chain test)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: qietr-pool
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          toolchain: stable
+          rustflags: ""
+
+      # --- Circuit artifacts (gitignored trusted-setup output) ---
+      # The Anchor TS suite proves against ../qietr-circuits build + dev keys.
+      - name: Install circom
+        run: |
+          curl -sSfL https://github.com/iden3/circom/releases/download/v2.1.9/circom-linux-amd64 -o "$HOME/.local/bin/circom" --create-dirs
+          chmod +x "$HOME/.local/bin/circom"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Build circuit + dev keys
+        working-directory: qietr-circuits
+        run: |
+          npm ci
+          npm run compile
+          npm run setup:dev
+
+      # --- Local @qietr/sdk (file: dependency used by the tests) ---
+      - name: Build local @qietr/sdk
+        working-directory: qietr-sdk
+        run: |
+          npm ci
+          npm run build
+
+      # --- Pinned Solana / Anchor toolchain (see qietr-pool/README.md) ---
+      # Agave 4.0.2 + anchor-lang 0.31.1 is the only combination that builds
+      # this program.
+      - name: Install Agave (Solana) 4.0.2
+        run: |
+          sh -c "$(curl -sSfL https://release.anza.xyz/v4.0.2/install)"
+          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
+      - name: Install Anchor CLI
+        run: |
+          cargo install --git https://github.com/coral-xyz/anchor --tag v0.31.1 anchor-cli --locked || \
+          npm install -g @coral-xyz/anchor-cli@0.31.1
+      - name: Generate a CI keypair
+        run: solana-keygen new --no-bip39-passphrase -s -o "$HOME/.config/solana/id.json"
+
+      - run: npm ci
+      # `anchor test` spins up a local validator, deploys, and runs the TS suite.
+      - name: anchor test
+        run: anchor test

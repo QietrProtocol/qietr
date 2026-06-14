@@ -2,6 +2,12 @@
 /geyser-plugin/target/
 **/*.rs.bk
 Cargo.lock
+# ...but DO commit the geyser plugin's lock. It's a cdylib (a binary
+# artifact, not a reusable library), and without a pinned lock CI
+# free-resolves a broken dependency graph — newer brotli / alloc-no-stdlib
+# versions that don't compile on current stable rustc. The committed lock
+# is the known-good resolution.
+!/geyser-plugin/Cargo.lock
 
 # Node
 node_modules/

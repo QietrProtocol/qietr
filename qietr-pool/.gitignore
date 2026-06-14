@@ -18,6 +18,7 @@ pnpm-debug.log*
 *.json
 !Anchor.toml
 !package.json
+!package-lock.json
 !tsconfig.json
 !Cargo.toml
 keypairs/

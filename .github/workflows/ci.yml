@@ -76,7 +76,23 @@ jobs:
           node-version: "24"
           cache: "npm"
           cache-dependency-path: qietr-circuits/package-lock.json
+      # circom is a standalone Rust binary (not on npm). Grab the pinned
+      # release used locally so the compiled wasm matches.
+      - name: Install circom
+        run: |
+          curl -sSfL https://github.com/iden3/circom/releases/download/v2.1.9/circom-linux-amd64 -o "$HOME/.local/bin/circom" --create-dirs
+          chmod +x "$HOME/.local/bin/circom"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - run: circom --version
       - run: npm ci
+      # The wasm + dev zkey + verifying key are gitignored (trusted-setup
+      # output, never committed). Build the circuit and a DEV-ONLY setup in
+      # CI so the prove/verify tests run for real. These keys are throwaway —
+      # production uses a real multi-party ceremony (see setup-dev.sh).
+      - name: Build circuit + dev keys
+        run: |
+          npm run compile
+          npm run setup:dev
       - run: npm test
 
   relayer:
@@ -195,38 +211,13 @@ jobs:
             ~/.cargo/git
             qietr-indexer/geyser-plugin/target
           key: ${{ runner.os }}-cargo-geyser-${{ hashFiles('qietr-indexer/geyser-plugin/Cargo.lock') }}
-      - run: cargo check
+      # --locked: use the committed Cargo.lock exactly. Without it CI
+      # free-resolves a newer brotli/alloc-no-stdlib graph that fails to
+      # compile on stable rustc.
+      - run: cargo check --locked
 
-  pool-anchor-test:
-    name: Pool program (anchor build + on-chain test)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: qietr-pool
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
-      - uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          toolchain: stable
-          rustflags: ""
-      # Pinned toolchain — see qietr-pool/README.md. Agave 4.0.2 + anchor-lang
-      # 0.31.1 are the only combination that builds this program.
-      - name: Install Agave (Solana) 4.0.2
-        run: |
-          sh -c "$(curl -sSfL https://release.anza.xyz/v4.0.2/install)"
-          echo "$HOME/.local/share/solana/install/active_release/bin" >> "$GITHUB_PATH"
-      - name: Install Anchor CLI
-        run: |
-          cargo install --git https://github.com/coral-xyz/anchor --tag v0.31.1 anchor-cli --locked || \
-          npm install -g @coral-xyz/anchor-cli@0.31.1
-      - name: Generate a CI keypair
-        run: solana-keygen new --no-bip39-passphrase -s -o "$HOME/.config/solana/id.json"
-      - run: npm ci
-      # `anchor test` spins up a local validator, deploys, and runs the TS suite —
-      # the on-chain coverage the prior cargo-check-only CI was missing (it was
-      # blind to bugs like the InvalidProgramId 3008 account-order regression).
-      - name: anchor test
-        run: anchor test
+  # NOTE: the full on-chain `anchor test` (spins up a validator, builds the
+  # program with the pinned platform-tools, builds the circuit + SDK, runs the
+  # TS suite) lives in .github/workflows/integration.yml. It runs nightly and
+  # on manual dispatch — too heavy (~15-20 min, slow anchor-cli install) to
+  # gate every push. The fast `pool` cargo-check job above is the per-push gate.
