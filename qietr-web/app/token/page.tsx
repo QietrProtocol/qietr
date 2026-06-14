@@ -48,13 +48,12 @@ export default function TokenPage() {
         <span style={{ color: "var(--text-secondary)" }}>
           The only official contract address is{" "}
           <CopyableCA address={QIET_CA} />. Verify it before buying &mdash;
-          beware of impostor tokens. Numbers below remain provisional until
-          finalized.
+          beware of impostor tokens.
         </span>
       </div>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
-        Planned protocol token of the Qietr network. Revenue share, governance,
-        and fee discounts. Final numbers decided before token generation event.
+        Protocol token of the Qietr network. Fee-driven buyback &amp; burn,
+        governance, and fee discounts.
       </p>
 
       {/* Supply */}
@@ -93,15 +92,15 @@ export default function TokenPage() {
           <tbody>
             <tr>
               <td style={{ ...tdStyle, fontWeight: 500 }}>Public</td>
-              <td style={tdStyle}>90%</td>
-              <td style={tdStyle}>900,000,000</td>
+              <td style={tdStyle}>96.6%</td>
+              <td style={tdStyle}>966,000,000</td>
               <td style={tdStyle}>Open to buy. No investor, no insider allocation.</td>
             </tr>
             <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Team</td>
-              <td style={tdStyle}>10%</td>
-              <td style={tdStyle}>100,000,000</td>
-              <td style={tdStyle}>Vested</td>
+              <td style={{ ...tdStyle, fontWeight: 500 }}>Locked</td>
+              <td style={tdStyle}>3.4%</td>
+              <td style={tdStyle}>34,000,000</td>
+              <td style={tdStyle}>Team allocation, locked.</td>
             </tr>
           </tbody>
         </table>
@@ -121,7 +120,7 @@ export default function TokenPage() {
           </thead>
           <tbody>
             <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Team</td>
+              <td style={{ ...tdStyle, fontWeight: 500 }}>Locked (team)</td>
               <td style={tdStyle}>12 months</td>
               <td style={tdStyle}>24 months</td>
               <td style={tdStyle}>36 months</td>
@@ -134,11 +133,12 @@ export default function TokenPage() {
       <h2 style={{ fontSize: "1.375rem", marginBottom: "var(--space-4)" }}>Utility</h2>
       <div style={{ display: "grid", gap: "var(--space-6)", marginBottom: "var(--space-8)" }}>
         <div>
-          <h3 style={{ fontSize: "1.125rem", marginBottom: "var(--space-2)" }}>Revenue share</h3>
+          <h3 style={{ fontSize: "1.125rem", marginBottom: "var(--space-2)" }}>Buyback &amp; burn</h3>
           <p style={{ color: "var(--text-secondary)", margin: 0 }}>
-            100% of deposit fees flow to $QIET holders. Fees range from 0.10% to
-            5.00% (set by governance, 1.00% default). Claim per epoch via the
-            RevenueDistributor program. Unclaimed share rolls forward.
+            100% of protocol fees are used to buy back $QIET from the open market
+            and burn it, permanently reducing supply. Fees range from 0.10% to
+            5.00% (set by governance, 1.00% default). Every fee tightens supply for
+            all holders.
           </p>
         </div>
         <div>
@@ -175,8 +175,8 @@ export default function TokenPage() {
       </div>
 
       <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", borderTop: "1px solid var(--border-subtle)", paddingTop: "var(--space-4)" }}>
-        $QIET is not a security or investment contract. Holders earn protocol
-        fees by holding. No price chart. No countdown. No allocation drama.
+        $QIET is not a security or investment contract. Protocol fees buy back
+        and burn supply. No price chart. No countdown. No allocation drama.
       </p>
     </main>
   );
