@@ -32,6 +32,8 @@ jobs:
           cache: "npm"
           cache-dependency-path: qietr-sdk/package-lock.json
       - run: npm ci
+      # Tests import the compiled output from ./dist (gitignored), so build first.
+      - run: npm run build
       - run: npm run typecheck
       - run: npm test
 
@@ -48,6 +50,14 @@ jobs:
           node-version: "24"
           cache: "npm"
           cache-dependency-path: qietr-web/package-lock.json
+      # The web app depends on `@qietr/sdk` via `file:../qietr-sdk` (a symlink),
+      # which serves its compiled ./dist. Build the SDK before the web typecheck,
+      # otherwise module resolution fails (TS2307: Cannot find module '@qietr/sdk').
+      - name: Build local @qietr/sdk
+        working-directory: qietr-sdk
+        run: |
+          npm ci
+          npm run build
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
