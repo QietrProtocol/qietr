@@ -40,11 +40,14 @@ export default function TokenPage() {
           fontSize: "0.9375rem",
         }}
       >
-        <strong>Not minted yet.</strong>{" "}
+        <strong>$QIET is live.</strong>{" "}
         <span style={{ color: "var(--text-secondary)" }}>
-          $QIET does not exist on any chain today. The design below is the
-          published plan &mdash; all numbers are provisional until the token
-          generation event. Beware of impostor tokens.
+          The only official contract address is{" "}
+          <code style={{ wordBreak: "break-all" }}>
+            MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump
+          </code>
+          . Verify it before buying &mdash; beware of impostor tokens. Numbers
+          below remain provisional until finalized.
         </span>
       </div>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
@@ -165,9 +168,9 @@ export default function TokenPage() {
       >
         <p style={{ margin: 0, fontSize: "0.9375rem" }}>
           <strong>Contract address:</strong>{" "}
-          <span style={{ color: "var(--text-secondary)" }}>
-            TBD before token generation event.
-          </span>
+          <code style={{ wordBreak: "break-all" }}>
+            MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump
+          </code>
         </p>
       </div>
 
