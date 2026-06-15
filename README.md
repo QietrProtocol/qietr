@@ -130,7 +130,7 @@ messaging — have been exercised against the live programs.
 |---|---|
 | Upgrade authority (all 3 programs) | `GWxyJs7G9FPUY58UTtUSpVwFuXTRdXzneyBcekxmvuR4` |
 | USDC mint (devnet) | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
-| `$QIET` token mint | _not minted yet_ |
+| `$QIET` token mint | 'MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump' |
 
 Verify any program with `solana program show <ID> -u devnet`.
 
@@ -143,7 +143,7 @@ Verify any program with `solana program show <ID> -u devnet`.
   required before mainnet.
 - ❌ **Public web app / hosted prover / npm package** — run the web UI and prover
   locally for now.
-- ❌ **$QIET token** — designed in the docs, not minted.
+
 
 ## Subprojects
 
