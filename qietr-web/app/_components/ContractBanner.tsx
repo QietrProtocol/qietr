@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { CopyableCA } from "./CopyableCA";
 
 export function ContractBanner() {
   const [dismissed, setDismissed] = useState(false);
@@ -30,7 +31,7 @@ export function ContractBanner() {
       }}
     >
       <span style={{ color: "var(--text-secondary)" }}>
-        $QIET token: <strong>MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump</strong>
+        $QIET token: <CopyableCA address="MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump" />
       </span>
       <button
         onClick={() => setDismissed(true)}

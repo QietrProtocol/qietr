@@ -1,3 +1,7 @@
+"use client";
+
+import { CopyableCA } from "../_components/CopyableCA";
+
 const tableStyle: React.CSSProperties = {
   width: "100%",
   borderCollapse: "collapse",
@@ -42,7 +46,7 @@ export default function TokenPage() {
           wordBreak: "break-all",
         }}
       >
-        MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump
+        <CopyableCA address="MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump" />
       </div>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
         Protocol token of the Qietr network. Fee-driven buyback &amp; burn,
@@ -163,9 +167,7 @@ export default function TokenPage() {
       >
         <p style={{ margin: 0, fontSize: "0.9375rem", wordBreak: "break-all" }}>
           <strong>Contract address:</strong>{" "}
-          <code style={{ color: "var(--text-secondary)" }}>
-            MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump
-          </code>
+          <CopyableCA address="MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump" />
         </p>
       </div>
 

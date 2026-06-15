@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { CopyableCA } from "../../_components/CopyableCA";
 
 const sidebarLinkStyle: React.CSSProperties = {
   color: "var(--text-secondary)",
@@ -146,7 +149,7 @@ export default function ProtocolPage() {
         </div>
         <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "var(--space-8)" }}>
           Devnet USDC mint: <code style={{ wordBreak: "break-all" }}>4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU</code>.
-          <code>$QIET</code> CA: <code style={{ wordBreak: "break-all" }}>MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump</code>. Unaudited.
+          <code>$QIET</code> CA: <CopyableCA address="MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump" />. Unaudited.
         </p>
 
         <h2 id="sdk" style={{ fontSize: "1.375rem", marginBottom: "var(--space-3)" }}>
