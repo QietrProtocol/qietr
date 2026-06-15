@@ -146,7 +146,7 @@ export default function ProtocolPage() {
         </div>
         <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", marginBottom: "var(--space-8)" }}>
           Devnet USDC mint: <code style={{ wordBreak: "break-all" }}>4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU</code>.
-          The <code>$QIET</code> token is not minted yet. Not deployed to mainnet; unaudited.
+          <code>$QIET</code> CA: <code style={{ wordBreak: "break-all" }}>MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump</code>. Unaudited.
         </p>
 
         <h2 id="sdk" style={{ fontSize: "1.375rem", marginBottom: "var(--space-3)" }}>

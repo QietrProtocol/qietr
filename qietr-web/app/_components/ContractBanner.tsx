@@ -30,7 +30,7 @@ export function ContractBanner() {
       }}
     >
       <span style={{ color: "var(--text-secondary)" }}>
-        $QIET token: <strong>not minted yet</strong>
+        $QIET token: <strong>MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump</strong>
       </span>
       <button
         onClick={() => setDismissed(true)}

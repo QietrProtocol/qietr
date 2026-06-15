@@ -1,4 +1,5 @@
 import { ConfiguredBanner } from "../../_components/ConfiguredBanner";
+import { FaucetCallout } from "../deposit/FaucetCallout";
 import { PayForms } from "./PayForms";
 
 export default function PayPage() {
@@ -32,6 +33,10 @@ export default function PayPage() {
           </>
         }
       />
+
+      <div style={{ height: "var(--space-6)" }} />
+
+      <FaucetCallout />
 
       <div style={{ height: "var(--space-6)" }} />
 

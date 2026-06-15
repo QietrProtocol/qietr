@@ -1,3 +1,4 @@
+import { FaucetCallout } from "../deposit/FaucetCallout";
 import { EscrowManager } from "./EscrowManager";
 
 export default function EscrowPage() {
@@ -15,6 +16,10 @@ export default function EscrowPage() {
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-6)" }}>
         Trust-minimized payments between clients and agents.
       </p>
+
+      <FaucetCallout />
+
+      <div style={{ height: "var(--space-6)" }} />
 
       <EscrowManager />
     </main>

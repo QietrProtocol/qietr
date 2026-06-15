@@ -29,18 +29,18 @@ export const USDC_MINT_DEVNET = new PublicKey(
 );
 
 // -----------------------------------------------------------------------------
-// $QIET token mint — LIVE.
-//
-// $QIET is NOT minted yet on any cluster. Both mainnet and devnet use the
-// System-Program placeholder. Once the token is launched, replace the
-// mainnet constant with the real mint address.
+// $QIET token mint — LIVE on both devnet and mainnet.
 // -----------------------------------------------------------------------------
 const QIET_MINT_PLACEHOLDER = "11111111111111111111111111111111";
 
-/** $QIET token mint on mainnet (PLACEHOLDER — not minted yet). */
-export const QIET_MINT_MAINNET = new PublicKey(QIET_MINT_PLACEHOLDER);
-/** $QIET token mint on devnet (PLACEHOLDER — not minted on devnet). */
-export const QIET_MINT_DEVNET = new PublicKey(QIET_MINT_PLACEHOLDER);
+/** $QIET token mint on mainnet. */
+export const QIET_MINT_MAINNET = new PublicKey(
+  "MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump",
+);
+/** $QIET token mint on devnet. */
+export const QIET_MINT_DEVNET = new PublicKey(
+  "MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump",
+);
 
 /** True once a real $QIET mint replaces the placeholder for `cluster`. */
 export function isQietMintDeployed(cluster: Cluster): boolean {

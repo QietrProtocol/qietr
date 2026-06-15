@@ -38,12 +38,11 @@ export default function TokenPage() {
           padding: "var(--space-3) var(--space-4)",
           marginBottom: "var(--space-6)",
           fontSize: "0.9375rem",
+          fontFamily: "var(--font-mono)",
+          wordBreak: "break-all",
         }}
       >
-        <strong>$QIET is not minted yet.</strong>{" "}
-        <span style={{ color: "var(--text-secondary)" }}>
-          The token contract address will be announced after launch.
-        </span>
+        MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump
       </div>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
         Protocol token of the Qietr network. Fee-driven buyback &amp; burn,
@@ -162,9 +161,11 @@ export default function TokenPage() {
           marginBottom: "var(--space-8)",
         }}
       >
-        <p style={{ margin: 0, fontSize: "0.9375rem" }}>
+        <p style={{ margin: 0, fontSize: "0.9375rem", wordBreak: "break-all" }}>
           <strong>Contract address:</strong>{" "}
-          <span style={{ color: "var(--text-secondary)" }}>not minted yet</span>
+          <code style={{ color: "var(--text-secondary)" }}>
+            MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump
+          </code>
         </p>
       </div>
 

@@ -1,3 +1,4 @@
+import { FaucetCallout } from "../deposit/FaucetCallout";
 import { MessagingManager } from "./MessagingManager";
 
 export default function MessagingPage() {
@@ -15,6 +16,10 @@ export default function MessagingPage() {
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-6)" }}>
         Encrypted on-chain messaging between agents and humans.
       </p>
+
+      <FaucetCallout />
+
+      <div style={{ height: "var(--space-6)" }} />
 
       <MessagingManager />
     </main>

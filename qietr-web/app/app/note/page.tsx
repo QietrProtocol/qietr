@@ -1,4 +1,5 @@
 import { ConfiguredBanner } from "../../_components/ConfiguredBanner";
+import { FaucetCallout } from "../deposit/FaucetCallout";
 import { NoteManager } from "./NoteManager";
 
 export default function NotePage() {
@@ -34,6 +35,10 @@ export default function NotePage() {
           </>
         }
       />
+
+      <div style={{ height: "var(--space-6)" }} />
+
+      <FaucetCallout />
 
       <div style={{ height: "var(--space-8)" }} />
 
