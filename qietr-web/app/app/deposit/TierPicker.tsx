@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { explorerTxUrl } from "../../_lib/explorer";
 import { appendActivity, formatUsdc } from "../../_lib/storage";
 import { useQietrSdk, useWalletSigner } from "../../_lib/use-sdk";
 
@@ -147,7 +148,15 @@ export function TierPicker() {
             wordBreak: "break-all",
           }}
         >
-          Deposit submitted. Signature: <code>{status.signature}</code>
+          Deposit submitted. Verify on-chain:{" "}
+          <a
+            href={explorerTxUrl(status.signature)}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "var(--accent)", fontWeight: 500 }}
+          >
+            <code>{status.signature.slice(0, 8)}…{status.signature.slice(-8)}</code> ↗
+          </a>
         </p>
       ) : null}
       {status.kind === "error" ? (

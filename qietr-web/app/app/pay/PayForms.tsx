@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PublicKey } from "@solana/web3.js";
 import { decryptNote } from "@qietr/sdk";
 import { Card } from "../../_components/Card";
+import { explorerTxUrl } from "../../_lib/explorer";
 import {
   appendActivity,
   loadEncryptedNote,
@@ -353,7 +354,18 @@ function StatusLine({ status }: { status: Status }) {
       >
         {status.signature ? (
           <>
-            Withdraw signature: <code>{status.signature}</code>
+            Withdraw submitted. Verify on-chain:{" "}
+            <a
+              href={explorerTxUrl(status.signature)}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "var(--accent)", fontWeight: 500 }}
+            >
+              <code>
+                {status.signature.slice(0, 8)}…{status.signature.slice(-8)}
+              </code>{" "}
+              ↗
+            </a>
           </>
         ) : (
           "Done."
