@@ -130,7 +130,7 @@ messaging — have been exercised against the live programs.
 |---|---|
 | Upgrade authority (all 3 programs) | `GWxyJs7G9FPUY58UTtUSpVwFuXTRdXzneyBcekxmvuR4` |
 | USDC mint (devnet) | `4zMMC9srt5Ri5X14GAgXhaHii3GnPAEERYPJgZJDncDU` |
-| `$QIET` token mint | MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump |
+| `$QIET` token mint | `MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump` |
 
 Verify any program with `solana program show <ID> -u devnet`.
 
