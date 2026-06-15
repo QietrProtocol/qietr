@@ -17,6 +17,7 @@ import { Card } from "../../_components/Card";
 import { explorerTxUrl } from "../../_lib/explorer";
 import { appendActivity } from "../../_lib/storage";
 import { useWalletSigner } from "../../_lib/use-sdk";
+import { sendAndConfirm } from "../../_lib/confirm-tx";
 
 type Tab = "send" | "inbox";
 
@@ -122,14 +123,7 @@ function SendForm() {
       tx.recentBlockhash = bh.blockhash;
 
       const signed = await signer.signTransaction(tx);
-      const sig = await connection.sendRawTransaction(signed.serialize(), {
-        skipPreflight: false,
-        preflightCommitment: "confirmed",
-      });
-      await connection.confirmTransaction(
-        { signature: sig, blockhash: bh.blockhash, lastValidBlockHeight: bh.lastValidBlockHeight },
-        "confirmed",
-      );
+      const sig = await sendAndConfirm(connection, signed.serialize(), bh.lastValidBlockHeight);
 
       appendActivity({
         type: "payment",
@@ -280,14 +274,7 @@ function InboxView() {
       tx.recentBlockhash = bh.blockhash;
 
       const signed = await signer.signTransaction(tx);
-      const sig = await connection.sendRawTransaction(signed.serialize(), {
-        skipPreflight: false,
-        preflightCommitment: "confirmed",
-      });
-      await connection.confirmTransaction(
-        { signature: sig, blockhash: bh.blockhash, lastValidBlockHeight: bh.lastValidBlockHeight },
-        "confirmed",
-      );
+      const sig = await sendAndConfirm(connection, signed.serialize(), bh.lastValidBlockHeight);
 
       setMessages((prev) => prev.filter((m) => m.pda !== msg.pda));
       setStatus({ kind: "success", signature: sig });

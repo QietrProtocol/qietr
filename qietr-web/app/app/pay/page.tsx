@@ -1,4 +1,4 @@
-import { Banner } from "../../_components/Banner";
+import { ConfiguredBanner } from "../../_components/ConfiguredBanner";
 import { PayForms } from "./PayForms";
 
 export default function PayPage() {
@@ -15,11 +15,23 @@ export default function PayPage() {
         Direct payment to a Solana address, or any x402 endpoint.
       </p>
 
-      <Banner tone="warning">
-        The pool program is live on Solana devnet. Both forms validate input and
-        walk the UX; submitting a real payment needs a configured indexer and
-        prover (run locally or use the SDK). Devnet only; not audited.
-      </Banner>
+      <ConfiguredBanner
+        configured={
+          <>
+            Connected to Solana <strong>devnet</strong> with a configured indexer
+            and prover — payments submit for real and the zero-knowledge proof is
+            generated in your browser. <strong>Not audited; uses a dev proving
+            key.</strong> Use throwaway devnet USDC only — never real funds.
+          </>
+        }
+        unconfigured={
+          <>
+            The pool program is live on Solana devnet. Both forms validate input
+            and walk the UX; submitting a real payment needs a configured indexer
+            and prover (run locally or use the SDK). Devnet only; not audited.
+          </>
+        }
+      />
 
       <div style={{ height: "var(--space-6)" }} />
 
