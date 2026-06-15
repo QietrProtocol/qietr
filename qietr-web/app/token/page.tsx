@@ -1,7 +1,3 @@
-import { CopyableCA } from "../_components/CopyableCA";
-
-const QIET_CA = "MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump";
-
 const tableStyle: React.CSSProperties = {
   width: "100%",
   borderCollapse: "collapse",
@@ -44,11 +40,9 @@ export default function TokenPage() {
           fontSize: "0.9375rem",
         }}
       >
-        <strong>$QIET is live.</strong>{" "}
+        <strong>$QIET is not minted yet.</strong>{" "}
         <span style={{ color: "var(--text-secondary)" }}>
-          The only official contract address is{" "}
-          <CopyableCA address={QIET_CA} />. Verify it before buying &mdash;
-          beware of impostor tokens.
+          The token contract address will be announced after launch.
         </span>
       </div>
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)" }}>
@@ -170,7 +164,7 @@ export default function TokenPage() {
       >
         <p style={{ margin: 0, fontSize: "0.9375rem" }}>
           <strong>Contract address:</strong>{" "}
-          <CopyableCA address={QIET_CA} />
+          <span style={{ color: "var(--text-secondary)" }}>not minted yet</span>
         </p>
       </div>
 

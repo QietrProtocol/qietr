@@ -31,16 +31,14 @@ export const USDC_MINT_DEVNET = new PublicKey(
 // -----------------------------------------------------------------------------
 // $QIET token mint — LIVE.
 //
-// $QIET was created via pump.fun on mainnet. Devnet has no $QIET mint; any
-// code path targeting devnet must handle the placeholder gracefully (use
-// `isQietMintDeployed()` to check before transferring or quoting).
+// $QIET is NOT minted yet on any cluster. Both mainnet and devnet use the
+// System-Program placeholder. Once the token is launched, replace the
+// mainnet constant with the real mint address.
 // -----------------------------------------------------------------------------
 const QIET_MINT_PLACEHOLDER = "11111111111111111111111111111111";
 
-/** $QIET token mint on mainnet — live at pump.fun CA. */
-export const QIET_MINT_MAINNET = new PublicKey(
-  "MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump",
-);
+/** $QIET token mint on mainnet (PLACEHOLDER — not minted yet). */
+export const QIET_MINT_MAINNET = new PublicKey(QIET_MINT_PLACEHOLDER);
 /** $QIET token mint on devnet (PLACEHOLDER — not minted on devnet). */
 export const QIET_MINT_DEVNET = new PublicKey(QIET_MINT_PLACEHOLDER);
 

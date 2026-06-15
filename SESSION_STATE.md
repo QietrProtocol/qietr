@@ -107,7 +107,7 @@
 | Task | Why blocked |
 |------|------------|
 | ~~Devnet deploy~~ (I1) | **DONE Session 5** — programs live, e2e passed. I2 (R2 artifact hosting) + I3 (Pages web deploy) still need Cloudflare |
-| ~~`$QIET` mint~~ | **DONE** — minted at `MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump`. SDK constants updated. Pool admin still needs to call `set_fee_vault` |
+| **$QIET mint** (K1) | **NOT STARTED** — token not minted yet. Both clusters use placeholder constants |
 | **Trusted-setup ceremony** (J1) | Needs contributor coordination |
 | **Audit** (J2) | User decision + budget |
 | **Cross-chain attestor** (L1) | Code built — `qietr-attestor/` package with watcher + VAA relayer. Needs deployment + Wormhole RPC config |

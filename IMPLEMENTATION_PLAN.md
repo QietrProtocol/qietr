@@ -65,7 +65,7 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked by
 
 ## Phase K — Token launch
 
-- [x] **K1.** `$QIET` minted via pump.fun at `MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump`. SDK `QIET_MINT_MAINNET` updated. `set_fee_vault` call still pending (needs pool admin to invoke).
+- [ ] **K1.** `$QIET` mint — not minted yet (both clusters use placeholder).
 
 ## Phase L — Cross-chain
 

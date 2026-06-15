@@ -20,5 +20,5 @@ Initial distribution focuses on:
 - Liquidity provisioning
 
 ## Contract
-- Devnet: QIET_MINT_DEVNET
-- Mainnet: QIET_MINT_MAINNET (to be announced)
+- Devnet: QIET_MINT_DEVNET (placeholder — not minted)
+- Mainnet: QIET_MINT_MAINNET (placeholder — not minted yet)
