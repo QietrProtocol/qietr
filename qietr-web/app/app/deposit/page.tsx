@@ -1,5 +1,6 @@
 import { Card } from "../../_components/Card";
 import { DepositBanner } from "./DepositBanner";
+import { FaucetCallout } from "./FaucetCallout";
 import { TierPicker } from "./TierPicker";
 
 export default function DepositPage() {
@@ -17,6 +18,10 @@ export default function DepositPage() {
       </p>
 
       <DepositBanner />
+
+      <div style={{ height: "var(--space-6)" }} />
+
+      <FaucetCallout />
 
       <div style={{ height: "var(--space-6)" }} />
 
