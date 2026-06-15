@@ -1,6 +1,6 @@
 # Session State — handoff notes
 
-**Last updated:** 2026-06-12 (Session 6: security constraints deployed to devnet + full e2e re-verified, SDK create_job account-order bug fixed)
+**Last updated:** 2026-06-15 (Session 7: $QIET mint integrated, cross-chain attestor built, SDK 114/114)
 
 ---
 
@@ -107,10 +107,11 @@
 | Task | Why blocked |
 |------|------------|
 | ~~Devnet deploy~~ (I1) | **DONE Session 5** — programs live, e2e passed. I2 (R2 artifact hosting) + I3 (Pages web deploy) still need Cloudflare |
-| **`$QIET` mint** | Needs SPL token creation + SDK constant update |
+| ~~`$QIET` mint~~ | **DONE** — minted at `MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump`. SDK constants updated. Pool admin still needs to call `set_fee_vault` |
 | **Trusted-setup ceremony** (J1) | Needs contributor coordination |
 | **Audit** (J2) | User decision + budget |
-| **Cross-chain attestor** (L1) | Deferred, spec exists |
+| **Cross-chain attestor** (L1) | Code built — `qietr-attestor/` package with watcher + VAA relayer. Needs deployment + Wormhole RPC config |
+| **Set fee vault** | Pool admin needs to call `buildSetFeeVaultIx` pointing at $QIET fee vault ATA |
 | **Push to GitHub** | No remotes configured |
 
 ---

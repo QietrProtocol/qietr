@@ -35,7 +35,7 @@ export const Launch: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: COLORS.ground }}>
       <Audio src={staticFile("launch.mp3")} volume={volumeAt} />
-      <Sequence from={0} durationInFrames={240}>
+      <Sequence durationInFrames={240}>
         <S1Trail />
       </Sequence>
       <Sequence from={240} durationInFrames={240}>

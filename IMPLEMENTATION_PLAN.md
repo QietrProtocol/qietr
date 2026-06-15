@@ -65,7 +65,7 @@ Status legend: `[ ]` todo · `[~]` in progress · `[x]` done · `[!]` blocked by
 
 ## Phase K — Token launch
 
-- [!] **K1.** `$QIET` launch deferred — will be created via pump.fun later (user decision, 2026-06-12). After launch: update `QIET_MINT_*` SDK constants + call `set_fee_vault`.
+- [x] **K1.** `$QIET` minted via pump.fun at `MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump`. SDK `QIET_MINT_MAINNET` updated. `set_fee_vault` call still pending (needs pool admin to invoke).
 
 ## Phase L — Cross-chain
 
