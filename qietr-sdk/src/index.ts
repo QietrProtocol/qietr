@@ -40,6 +40,7 @@ export {
   requireQietMint,
   ASSOCIATED_TOKEN_PROGRAM_ID,
   findAssociatedTokenAddress,
+  buildCreateAtaIdempotentIx,
   pickTier,
   isCrossChain,
   getChainEid,

@@ -17,6 +17,7 @@ import {
   findEscrowVaultPda,
   parseJobAccount,
   findAssociatedTokenAddress,
+  buildCreateAtaIdempotentIx,
   USDC_MINT_MAINNET,
   USDC_MINT_DEVNET,
   TOKEN_PROGRAM_ID,
@@ -132,6 +133,17 @@ function CreateJobForm() {
       const nonce = crypto.getRandomValues(new Uint8Array(8));
       const clientAta = findAssociatedTokenAddress(signer.publicKey, usdcMint);
 
+      // `create_job` requires client_ata to already exist (it transfers from it
+      // into the escrow vault). A wallet that has never held this mint has no
+      // ATA yet → AccountNotInitialized (0xbc4 / 3012). Prepend an idempotent
+      // create so the first escrow from a fresh wallet succeeds; it's a no-op
+      // when the ATA already exists.
+      const createAtaIx = buildCreateAtaIdempotentIx(
+        signer.publicKey,
+        signer.publicKey,
+        usdcMint,
+      );
+
       const ix = buildCreateJobIx(
         agentPubkey,
         nonce,
@@ -142,7 +154,7 @@ function CreateJobForm() {
       );
 
       const tx = new Transaction();
-      tx.add(ix);
+      tx.add(createAtaIx, ix);
       tx.feePayer = signer.publicKey;
 
       const bh = await connection.getLatestBlockhash("confirmed");

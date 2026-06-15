@@ -10,6 +10,8 @@
 import {
   Connection,
   PublicKey,
+  SystemProgram,
+  TransactionInstruction,
   type Cluster as Web3Cluster,
 } from "@solana/web3.js";
 import { TOKEN_PROGRAM_ID } from "./program.js";
@@ -126,6 +128,37 @@ export function findAssociatedTokenAddress(
     [owner.toBytes(), TOKEN_PROGRAM_ID.toBytes(), mint.toBytes()],
     ASSOCIATED_TOKEN_PROGRAM_ID,
   )[0];
+}
+
+/**
+ * Build an idempotent "create associated token account" instruction.
+ *
+ * Programs like qietr_escrow's `create_job` require the caller's ATA to already
+ * exist (they hold a plain `Account<TokenAccount>`, not `init_if_needed`).
+ * Prepending this instruction guarantees the ATA exists; the *idempotent*
+ * variant (instruction discriminator `1`) is a no-op if it already does, so it
+ * is always safe to include. Hand-rolled to keep `@solana/spl-token` out of the
+ * dependency graph, matching `findAssociatedTokenAddress` above.
+ */
+export function buildCreateAtaIdempotentIx(
+  payer: PublicKey,
+  owner: PublicKey,
+  mint: PublicKey,
+): TransactionInstruction {
+  const ata = findAssociatedTokenAddress(owner, mint);
+  return new TransactionInstruction({
+    programId: ASSOCIATED_TOKEN_PROGRAM_ID,
+    keys: [
+      { pubkey: payer, isSigner: true, isWritable: true },
+      { pubkey: ata, isSigner: false, isWritable: true },
+      { pubkey: owner, isSigner: false, isWritable: false },
+      { pubkey: mint, isSigner: false, isWritable: false },
+      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
+      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
+    ],
+    // 1 = CreateIdempotent (0 = Create, which fails if the ATA exists).
+    data: Buffer.from([1]),
+  });
 }
 
 export function makeConnection(config: QietrSDKConfig): Connection {
