@@ -33,6 +33,14 @@ export default function DocsHome() {
             </p>
           </Card>
         </Link>
+        <Link href="/docs/app-guide/" style={{ textDecoration: "none", color: "inherit" }}>
+          <Card>
+            <h2 style={{ fontSize: "1.125rem", marginBottom: "var(--space-2)" }}>App guide</h2>
+            <p style={{ color: "var(--text-secondary)", margin: 0, fontSize: "0.9375rem" }}>
+              Walkthrough of every feature: deposit, pay, note manager, messaging, escrow.
+            </p>
+          </Card>
+        </Link>
         <Link href="/docs/protocol/" style={{ textDecoration: "none", color: "inherit" }}>
           <Card>
             <h2 style={{ fontSize: "1.125rem", marginBottom: "var(--space-2)" }}>Protocol</h2>
