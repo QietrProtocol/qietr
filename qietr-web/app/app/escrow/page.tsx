@@ -1,5 +1,4 @@
-import { Banner } from "../../_components/Banner";
-import { Card } from "../../_components/Card";
+import { EscrowManager } from "./EscrowManager";
 
 export default function EscrowPage() {
   return (
@@ -17,85 +16,7 @@ export default function EscrowPage() {
         Trust-minimized payments between clients and agents.
       </p>
 
-      <Banner tone="warning">
-        The qietr-escrow program is live on Solana devnet. This hosted screen is
-        a preview; creating real escrows works from the SDK or a locally-configured
-        build. Devnet only; not audited.
-      </Banner>
-
-      <div style={{ height: "var(--space-6)" }} />
-
-      <Card>
-        <h2 style={{ fontSize: "1.125rem", marginBottom: "var(--space-3)" }}>
-          Job lifecycle
-        </h2>
-        <div
-          style={{
-            fontFamily: "var(--font-mono)",
-            fontSize: "0.875rem",
-            lineHeight: 2,
-            padding: "var(--space-4)",
-            background: "var(--surface-2)",
-            borderRadius: "var(--radius-base)",
-          }}
-        >
-          Created &rarr; Accepted &rarr; Completed &rarr; Released
-          <br />
-          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&darr;
-          <br />
-          &nbsp;&nbsp;&nbsp;&nbsp;Refunded
-          <br />
-          <br />
-          Completed &rarr; Disputed
-        </div>
-      </Card>
-
-      <div style={{ height: "var(--space-6)" }} />
-
-      <Card>
-        <h2 style={{ fontSize: "1.125rem", marginBottom: "var(--space-3)" }}>
-          How it works
-        </h2>
-        <ol style={{ margin: 0, paddingLeft: "var(--space-6)", lineHeight: 1.8 }}>
-          <li>
-            <strong>Client creates a job.</strong> USDC is transferred into an
-            escrow vault PDA. Price and terms are set.
-          </li>
-          <li>
-            <strong>Agent accepts.</strong> The agent locks in by signing the
-            accept instruction.
-          </li>
-          <li>
-            <strong>Agent completes.</strong> Once the work is done, the agent
-            marks the job complete.
-          </li>
-          <li>
-            <strong>Client releases.</strong> After verifying the work, the
-            client releases payment from escrow to the agent.
-          </li>
-          <li>
-            <strong>Dispute.</strong> If the work is unsatisfactory, the
-            client can flag a dispute.
-          </li>
-          <li>
-            <strong>Refund.</strong> Before the agent accepts, the client can
-            cancel and reclaim their funds.
-          </li>
-        </ol>
-      </Card>
-
-      <div style={{ height: "var(--space-6)" }} />
-
-      <Card>
-        <h2 style={{ fontSize: "1.125rem", marginBottom: "var(--space-3)" }}>
-          Use cases
-        </h2>
-        <ul style={{ margin: 0, paddingLeft: "var(--space-6)", lineHeight: 1.8 }}>
-          <li>Freelance payment with on-chain escrow</li>
-          <li>Agent service marketplace integration</li>
-          <li>AI agent-to-agent payments for completed tasks</li>
-        </ul>
-      </Card>
+      <EscrowManager />
     </main>
   );
 }
