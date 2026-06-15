@@ -46,10 +46,17 @@ import {
   randomFieldDec,
 } from "@qietr/sdk";
 
+// Path resolution is anchored to the current working directory rather than
+// `__dirname`. The suite imports the ESM-only `@qietr/sdk`, which forces mocha
+// to load these tests via the ESM loader (a CJS `require` of the SDK throws
+// ERR_REQUIRE_ESM and mocha falls back to `import()`), and in ESM scope
+// `__dirname` is undefined. We also can't use `import.meta.url` because
+// tsconfig pins `module: commonjs` (TS1343). `process.cwd()` is the only
+// resolver that works in both CJS and ESM — and both `anchor test` and the
+// `npm test` script run from the qietr-pool directory, so it's deterministic.
+const REPO_ROOT = path.resolve(process.cwd(), "..");
 export const CIRCUITS_DIR = path.resolve(
-  __dirname,
-  "..",
-  "..",
+  REPO_ROOT,
   "qietr-circuits",
   "build",
 );
@@ -59,9 +66,7 @@ export const WASM_PATH = path.join(
   "qietr_payment.wasm",
 );
 export const ZKEY_PATH = path.resolve(
-  __dirname,
-  "..",
-  "..",
+  REPO_ROOT,
   "qietr-circuits",
   "keys",
   "qietr_payment_dev.zkey",
