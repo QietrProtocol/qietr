@@ -133,6 +133,29 @@ function CreateJobForm() {
       const nonce = crypto.getRandomValues(new Uint8Array(8));
       const clientAta = findAssociatedTokenAddress(signer.publicKey, usdcMint);
 
+      // Pre-flight balance check: create_job moves the full escrow amount out
+      // of the client's USDC ATA immediately, so a low balance fails on-chain
+      // with a raw "insufficient funds" (Token 0x1) simulation error. Catch it
+      // here and point the tester at the faucet instead. A missing ATA throws
+      // (no account) → treat as zero balance.
+      let balanceMicro = 0n;
+      try {
+        const bal = await connection.getTokenAccountBalance(clientAta);
+        balanceMicro = BigInt(bal.value.amount);
+      } catch {
+        balanceMicro = 0n;
+      }
+      if (balanceMicro < priceMicro) {
+        const fundHint = cluster.includes("mainnet")
+          ? `Fund your wallet with USDC (mint ${usdcMint.toBase58()}).`
+          : `Claim devnet USDC at faucet.circle.com (Solana Devnet) for mint ${usdcMint.toBase58()}.`;
+        setStatus({
+          kind: "error",
+          message: `Insufficient USDC: you have ${microToUsdc(balanceMicro)}, need ${amt}. ${fundHint}`,
+        });
+        return;
+      }
+
       // `create_job` requires client_ata to already exist (it transfers from it
       // into the escrow vault). A wallet that has never held this mint has no
       // ATA yet → AccountNotInitialized (0xbc4 / 3012). Prepend an idempotent
