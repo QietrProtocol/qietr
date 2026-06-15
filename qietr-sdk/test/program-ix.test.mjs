@@ -7,6 +7,7 @@ import { PublicKey } from "@solana/web3.js";
 import {
   buildDepositIx,
   buildWithdrawIx,
+  buildSetFeeVaultIx,
   findPoolConfigPda,
   findDenominationPda,
   findMerkleTreePda,
@@ -165,6 +166,22 @@ describe("buildWithdrawIx", () => {
         ),
       /expected 6 public signals/,
     );
+  });
+});
+
+describe("buildSetFeeVaultIx", () => {
+  it("builds a valid set_fee_vault instruction with correct accounts", () => {
+    const ix = buildSetFeeVaultIx({
+      config: dummyOwner,
+      admin: dummyOwner,
+      feeVault: dummyOwner,
+    });
+    assert.equal(ix.programId.toBase58(), QIETR_POOL_PROGRAM_ID.toBase58());
+    assert.equal(ix.keys.length, 3, "set_fee_vault has 3 account metas");
+    assert.equal(ix.keys[0].isWritable, true, "config is writable");
+    assert.equal(ix.keys[1].isSigner, true, "admin is signer");
+    assert.equal(ix.keys[2].isWritable, false, "fee_vault is not writable");
+    assert.equal(ix.data.length, 8, "set_fee_vault data is 8 bytes (discriminator only)");
   });
 });
 

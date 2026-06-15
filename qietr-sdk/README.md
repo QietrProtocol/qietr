@@ -2,8 +2,9 @@
 
 TypeScript SDK for [Qietr](../README.md) — privacy-preserving stablecoin payments on Solana with native x402 support.
 
-**Status:** implemented and tested against the live devnet programs. 100/100 unit
-tests pass. Not yet published to npm — build from source (see Quick start).
+**Status:** implemented and tested against the live devnet programs. 113/113 unit
+tests pass. Publish to npm via `npm publish --access public` (requires npm token
+set as `NPM_TOKEN` in CI or `.npmrc`; see `.github/workflows/publish-sdk.yml`).
 
 ## Layout
 

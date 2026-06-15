@@ -51,6 +51,7 @@ export {
   buildDepositIx,
   buildTransferIx,
   buildWithdrawIx,
+  buildSetFeeVaultIx,
   findPoolConfigPda,
   findDenominationPda,
   findMerkleTreePda,

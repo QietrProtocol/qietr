@@ -129,6 +129,40 @@ export function buildTransferIx(
 }
 
 // -----------------------------------------------------------------------------
+// Admin instruction builders
+// -----------------------------------------------------------------------------
+
+export interface SetFeeVaultIxAccounts {
+  config: PublicKey;
+  admin: PublicKey;
+  feeVault: PublicKey;
+}
+
+/**
+ * Build the on-chain `set_fee_vault` instruction.
+ *
+ * Wire format: anchorIxDiscriminator("set_fee_vault") (8 bytes).
+ *
+ * Account order (matches lib.rs::SetFeeVault):
+ *   config (writable), admin (signer), fee_vault.
+ */
+export function buildSetFeeVaultIx(
+  accts: SetFeeVaultIxAccounts,
+  programId: PublicKey = QIETR_POOL_PROGRAM_ID,
+): TransactionInstruction {
+  const disc = anchorIxDiscriminator("set_fee_vault");
+  return new TransactionInstruction({
+    programId,
+    keys: [
+      { pubkey: accts.config, isSigner: false, isWritable: true },
+      { pubkey: accts.admin, isSigner: true, isWritable: false },
+      { pubkey: accts.feeVault, isSigner: false, isWritable: false },
+    ],
+    data: Buffer.from(disc),
+  });
+}
+
+// -----------------------------------------------------------------------------
 // Instruction builders
 // -----------------------------------------------------------------------------
 

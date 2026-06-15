@@ -29,19 +29,19 @@ export const USDC_MINT_DEVNET = new PublicKey(
 );
 
 // -----------------------------------------------------------------------------
-// $QIET token mint — NOT YET MINTED.
+// $QIET token mint — LIVE.
 //
-// These are System Program placeholders (all 1s). The $QIET token does not
-// exist on any cluster yet (planned for Phase C). They are exported only so the
-// public surface is stable; do NOT transfer to or quote against them. Use
-// `isQietMintDeployed()` / `requireQietMint()` to guard any code path that
-// touches $QIET so a placeholder can never be mistaken for a live mint.
+// $QIET was created via pump.fun on mainnet. Devnet has no $QIET mint; any
+// code path targeting devnet must handle the placeholder gracefully (use
+// `isQietMintDeployed()` to check before transferring or quoting).
 // -----------------------------------------------------------------------------
 const QIET_MINT_PLACEHOLDER = "11111111111111111111111111111111";
 
-/** $QIET token mint on mainnet (PLACEHOLDER — not minted). */
-export const QIET_MINT_MAINNET = new PublicKey(QIET_MINT_PLACEHOLDER);
-/** $QIET token mint on devnet (PLACEHOLDER — not minted). */
+/** $QIET token mint on mainnet — live at pump.fun CA. */
+export const QIET_MINT_MAINNET = new PublicKey(
+  "MXDRgSQstTKBMunuF2VmcnBejpbidECL5vtCAb6pump",
+);
+/** $QIET token mint on devnet (PLACEHOLDER — not minted on devnet). */
 export const QIET_MINT_DEVNET = new PublicKey(QIET_MINT_PLACEHOLDER);
 
 /** True once a real $QIET mint replaces the placeholder for `cluster`. */
@@ -54,8 +54,8 @@ export function isQietMintDeployed(cluster: Cluster): boolean {
 export function requireQietMint(cluster: Cluster): PublicKey {
   if (!isQietMintDeployed(cluster)) {
     throw new Error(
-      "$QIET is not minted yet — the mint constant is a System Program placeholder. " +
-        "Do not transfer or quote against it.",
+      "$QIET is not deployed on this cluster — the mint constant is a System Program placeholder. " +
+        "Mainnet only at this time.",
     );
   }
   return cluster === "mainnet-beta" ? QIET_MINT_MAINNET : QIET_MINT_DEVNET;
