@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "./globals.css";
 import { Nav } from "./_components/Nav";
+import { ContractBanner } from "./_components/ContractBanner";
 import { Footer } from "./_components/Footer";
 import { WalletAdapterProvider } from "./_components/WalletAdapterProvider";
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <body>
         <WalletAdapterProvider>
           <Nav />
+          <ContractBanner />
           {children}
           <Footer />
         </WalletAdapterProvider>

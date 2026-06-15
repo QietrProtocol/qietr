@@ -3,6 +3,19 @@
     "neon": {
       "type": "http",
       "url": "https://mcp.neon.tech/mcp"
+    },
+    "insforge": {
+      "command": "cmd",
+      "args": [
+        "/c",
+        "npx",
+        "-y",
+        "@insforge/mcp@latest"
+      ],
+      "env": {
+        "API_KEY": "ik_72335e388a42f2c6d2e1192de08b21f9",
+        "API_BASE_URL": "https://i4m4ijn8.us-east.insforge.app"
+      }
     }
   }
 }
