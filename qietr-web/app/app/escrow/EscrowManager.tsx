@@ -525,7 +525,9 @@ function BrowseJobs() {
           : `Resolve — available ${new Date(readyAt * 1000).toLocaleDateString()}`;
       return [{ label, action: "resolve" }];
     }
-    if (state === JobState.Released || state === JobState.Refunded) {
+    if ((state === JobState.Released || state === JobState.Refunded) && isClient) {
+      // Only the client should close: close_job refunds the account rent to the
+      // signer (claimant), and the client is the one who paid it on creation.
       return [{ label: "Close", action: "close" }];
     }
     return [];
