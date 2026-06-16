@@ -10,7 +10,7 @@
 // token was claimed, not that the deposit will mysteriously fail later.
 // =============================================================================
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { USDC_MINT_DEVNET, USDC_MINT_MAINNET, findAssociatedTokenAddress } from "@qietr/sdk";
@@ -30,7 +30,7 @@ type State =
 
 export function WalletBalance() {
   const { connection } = useConnection();
-  const { signer, connected } = useWalletSigner();
+  const { signer, connected, address } = useWalletSigner();
   const [state, setState] = useState<State>({ kind: "idle" });
 
   async function refresh(): Promise<void> {
@@ -64,6 +64,20 @@ export function WalletBalance() {
       setState({ kind: "error", message });
     }
   }
+
+  // Auto-fetch the latest balance whenever a wallet connects or the connected
+  // address changes, so the user never has to click to see their starting
+  // balance. The manual "Refresh" button stays for on-demand re-checks (e.g.
+  // right after claiming from a faucet). Keyed on `address` so it fires once
+  // per connected wallet, not on every render.
+  useEffect(() => {
+    if (!connected || !address) {
+      setState({ kind: "idle" });
+      return;
+    }
+    void refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connected, address]);
 
   return (
     <div>

@@ -7,8 +7,12 @@
 // cluster is overridable via `NEXT_PUBLIC_QIETR_CLUSTER` so a developer
 // pointing at a local validator just sets `localnet`.
 //
-// `autoConnect` is false on purpose — the user shouldn't be silently
-// connected to a wallet just by visiting qietr.com.
+// `autoConnect` is true: once a visitor has connected a wallet, the adapter
+// persists the chosen wallet name in localStorage and silently reconnects on
+// later visits / page navigations — so the user doesn't re-approve a
+// connection on every page. A first-time visitor with no stored wallet is NOT
+// auto-connected; nothing pops up until they act (the one-time connect prompt
+// for new users on /app is handled separately by AppConnectPrompt).
 // =============================================================================
 
 import { useMemo, type ReactNode } from "react";
@@ -58,7 +62,7 @@ export function WalletAdapterProvider({ children }: { children: ReactNode }) {
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect={false}>
+      <WalletProvider wallets={wallets} autoConnect={true}>
         <WalletModalProvider>{children}</WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>

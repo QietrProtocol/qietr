@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Card } from "../_components/Card";
+import { AppConnectPrompt } from "../_components/AppConnectPrompt";
 
 export default function AppHome() {
   return (
@@ -10,6 +11,7 @@ export default function AppHome() {
         padding: "var(--space-12) var(--space-6)",
       }}
     >
+      <AppConnectPrompt />
       <h1 style={{ fontSize: "1.875rem", marginBottom: "var(--space-4)" }}>
         App
       </h1>
