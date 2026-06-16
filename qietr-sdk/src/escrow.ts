@@ -163,14 +163,21 @@ export function buildResolveDisputeIx(
   jobPda: PublicKey,
   escrowVault: PublicKey,
   clientAta: PublicKey,
+  caller: PublicKey,
   programId: PublicKey = QIETR_ESCROW_PROGRAM_ID,
 ): TransactionInstruction {
+  // resolve_dispute is permissionless (anyone may trigger the timeout-based
+  // refund), but the program still requires a `caller` Signer. Account order
+  // must match ResolveDispute: job, escrow_vault, client_ata, caller,
+  // token_program. The refund destination is pinned to the job's client
+  // on-chain, so a third-party caller cannot redirect funds.
   return new TransactionInstruction({
     programId,
     keys: [
       { pubkey: jobPda, isSigner: false, isWritable: true },
       { pubkey: escrowVault, isSigner: false, isWritable: true },
       { pubkey: clientAta, isSigner: false, isWritable: true },
+      { pubkey: caller, isSigner: true, isWritable: false },
       { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
     ],
     data: Buffer.from(anchorDiscriminator("resolve_dispute")),

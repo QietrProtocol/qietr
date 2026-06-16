@@ -12,6 +12,7 @@ import {
   buildReleasePaymentIx,
   buildDisputeJobIx,
   buildCancelJobIx,
+  buildResolveDisputeIx,
   buildCloseJobIx,
   findJobPda,
   findEscrowVaultPda,
@@ -39,6 +40,9 @@ type Status =
 
 const JOB_ACCOUNT_SIZE = 8 + 32 + 32 + 8 + 8 + 8 + 8 + 8 + 8 + 1 + 1 + 1;
 const USDC_DECIMALS = 1_000_000;
+// Must match DISPUTE_TIMEOUT_SECONDS in the qietr_escrow program: a disputed
+// job can only be resolved (auto-refund to the client) 7 days after completion.
+const DISPUTE_TIMEOUT_SECONDS = 7 * 24 * 3600;
 
 const STATE_LABELS: Record<JobState, string> = {
   [JobState.Created]: "Created",
@@ -394,6 +398,33 @@ function BrowseJobs() {
         case "dispute":
           ix = buildDisputeJobIx(jobPda, signer.publicKey);
           break;
+        case "resolve":
+          {
+            // resolve_dispute auto-refunds the client, but only after the
+            // 7-day cooling-off. Guard client-side so the user gets a clear
+            // message instead of a raw DisputeTimeoutNotElapsed error.
+            const readyAt = job.completedAt + DISPUTE_TIMEOUT_SECONDS;
+            const now = Math.floor(Date.now() / 1000);
+            if (now < readyAt) {
+              setStatus({
+                kind: "error",
+                message:
+                  `Disputed jobs auto-refund the client 7 days after completion. ` +
+                  `Available ${new Date(readyAt * 1000).toLocaleString()}.`,
+              });
+              return;
+            }
+            const [vaultPda] = findEscrowVaultPda(
+              new PublicKey(job.client),
+              Buffer.from(job.nonce, "hex"),
+            );
+            const clientAta = findAssociatedTokenAddress(
+              new PublicKey(job.client),
+              USDC_MINT_DEVNET,
+            );
+            ix = buildResolveDisputeIx(jobPda, vaultPda, clientAta, signer.publicKey);
+          }
+          break;
         case "cancel":
           {
             const [vaultPda] = findEscrowVaultPda(
@@ -451,7 +482,13 @@ function BrowseJobs() {
       if (isClient) return [{ label: "Release payment", action: "release" }];
     }
     if (state === JobState.Disputed && isClient) {
-      return [{ label: "Resolve (refund)", action: "cancel" }];
+      const readyAt = job.completedAt + DISPUTE_TIMEOUT_SECONDS;
+      const now = Math.floor(Date.now() / 1000);
+      const label =
+        now >= readyAt
+          ? "Resolve (refund)"
+          : `Resolve — available ${new Date(readyAt * 1000).toLocaleDateString()}`;
+      return [{ label, action: "resolve" }];
     }
     if (state === JobState.Released || state === JobState.Refunded) {
       return [{ label: "Close", action: "close" }];
