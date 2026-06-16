@@ -34,6 +34,7 @@ export function Nav() {
       </Link>
       <div style={{ display: "flex", gap: "var(--space-6)", alignItems: "center" }}>
         <Link href="/app/" style={linkStyle}>App</Link>
+        <Link href="/#roadmap" style={linkStyle}>Roadmap</Link>
         <Link href="/docs/" style={linkStyle}>Docs</Link>
         <Link href="/token/" style={linkStyle}>Token</Link>
         <Link href="/security/" style={linkStyle}>Security</Link>

@@ -52,6 +52,92 @@ const stepNumberStyle: React.CSSProperties = {
   marginTop: 2,
 };
 
+type RoadmapStatus = "shipped" | "in-progress" | "planned";
+
+interface RoadmapPhase {
+  phase: string;
+  title: string;
+  status: RoadmapStatus;
+  items: string[];
+}
+
+const ROADMAP: RoadmapPhase[] = [
+  {
+    phase: "Phase 1",
+    title: "Devnet protocol",
+    status: "shipped",
+    items: [
+      "Shielded pool with Groth16 zk-SNARK withdrawals",
+      "Deposit, pay, and x402 flows live on Solana devnet",
+      "Encrypted notes, agent messaging, and job escrow",
+      "Open-source SDK and hosted web app",
+    ],
+  },
+  {
+    phase: "Phase 2",
+    title: "Hardening",
+    status: "in-progress",
+    items: [
+      "Ongoing bug fixes and protocol stabilization",
+      "Expanded documentation and developer guides",
+      "Load and stress testing across the payment path",
+      "Agent framework compatibility and integrations",
+      "Trusted-setup ceremony for a production proving key",
+      "Third-party security audit of the on-chain program",
+      "Relayer network for gasless, unlinkable withdrawals",
+      "Published npm package for the SDK",
+    ],
+  },
+  {
+    phase: "Phase 3",
+    title: "Mainnet",
+    status: "planned",
+    items: [
+      "Mainnet-beta launch with audited contracts",
+      "Real-USDC shielded payments",
+      "Cross-chain deposits and settlement",
+      "Agent integrations and partner endpoints",
+    ],
+  },
+];
+
+function StatusBadge({ status }: { status: RoadmapStatus }) {
+  const config: Record<RoadmapStatus, { label: string; color: string; bg: string }> = {
+    shipped: { label: "Shipped", color: "var(--success)", bg: "color-mix(in srgb, var(--success) 14%, transparent)" },
+    "in-progress": { label: "In progress", color: "var(--accent)", bg: "color-mix(in srgb, var(--accent) 14%, transparent)" },
+    planned: { label: "Planned", color: "var(--text-secondary)", bg: "var(--surface-2)" },
+  };
+  const c = config[status];
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "var(--space-1)",
+        fontSize: "0.75rem",
+        fontWeight: 600,
+        color: c.color,
+        background: c.bg,
+        borderRadius: "var(--radius-pill)",
+        padding: "2px 10px",
+        whiteSpace: "nowrap",
+      }}
+    >
+      <span
+        aria-hidden
+        style={{
+          width: 6,
+          height: 6,
+          borderRadius: "50%",
+          background: "currentColor",
+          display: "inline-block",
+        }}
+      />
+      {c.label}
+    </span>
+  );
+}
+
 export default function HomePage() {
   return (
     <main
@@ -302,6 +388,65 @@ const payment = await sdk.pay({
               messaging on the same primitives.
             </p>
           </Card>
+        </div>
+      </section>
+
+      {/* Roadmap */}
+      <section id="roadmap" style={{ ...sectionStyle, scrollMarginTop: "var(--space-8)" }}>
+        <h2 style={sectionTitleStyle}>Roadmap</h2>
+        <p style={sectionSubtitleStyle}>
+          Where Qietr is today, and the path to a production-ready private
+          payment rail.
+        </p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))",
+            gap: "var(--space-6)",
+          }}
+        >
+          {ROADMAP.map((phase) => (
+            <Card key={phase.title}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "var(--space-3)",
+                  marginBottom: "var(--space-4)",
+                }}
+              >
+                <span
+                  style={{
+                    fontSize: "0.75rem",
+                    fontWeight: 600,
+                    letterSpacing: "0.04em",
+                    textTransform: "uppercase",
+                    color: "var(--text-secondary)",
+                  }}
+                >
+                  {phase.phase}
+                </span>
+                <StatusBadge status={phase.status} />
+              </div>
+              <h3 style={{ fontSize: "1.125rem", marginBottom: "var(--space-3)" }}>
+                {phase.title}
+              </h3>
+              <ul
+                style={{
+                  margin: 0,
+                  paddingLeft: "var(--space-5)",
+                  color: "var(--text-secondary)",
+                  fontSize: "0.875rem",
+                  lineHeight: 1.7,
+                }}
+              >
+                {phase.items.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </Card>
+          ))}
         </div>
       </section>
 

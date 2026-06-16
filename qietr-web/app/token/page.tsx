@@ -105,26 +105,10 @@ export default function TokenPage() {
 
       {/* Vesting */}
       <h2 style={{ fontSize: "1.375rem", marginBottom: "var(--space-4)" }}>Vesting schedule</h2>
-      <div style={{ overflowX: "auto", marginBottom: "var(--space-8)" }}>
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th style={thStyle}>Bucket</th>
-              <th style={thStyle}>Cliff</th>
-              <th style={thStyle}>Linear vest</th>
-              <th style={thStyle}>Total</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td style={{ ...tdStyle, fontWeight: 500 }}>Locked (team)</td>
-              <td style={tdStyle}>12 months</td>
-              <td style={tdStyle}>24 months</td>
-              <td style={tdStyle}>36 months</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-8)", maxWidth: "60ch" }}>
+        Team tokens are locked 1 month at a time and re-locked on each expiry.
+        Mainnet is launching within 1 month, after which the lock renews.
+      </p>
 
       {/* Utility */}
       <h2 style={{ fontSize: "1.375rem", marginBottom: "var(--space-4)" }}>Utility</h2>
