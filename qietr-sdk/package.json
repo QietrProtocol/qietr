@@ -11,27 +11,33 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
     },
     "./note": {
       "types": "./dist/note.d.ts",
-      "import": "./dist/note.js"
+      "import": "./dist/note.js",
+      "default": "./dist/note.js"
     },
     "./merkle": {
       "types": "./dist/merkle.d.ts",
-      "import": "./dist/merkle.js"
+      "import": "./dist/merkle.js",
+      "default": "./dist/merkle.js"
     },
     "./prover": {
       "types": "./dist/prover.d.ts",
-      "import": "./dist/prover.js"
+      "import": "./dist/prover.js",
+      "default": "./dist/prover.js"
     },
     "./pubkey": {
       "types": "./dist/pubkey.d.ts",
-      "import": "./dist/pubkey.js"
+      "import": "./dist/pubkey.js",
+      "default": "./dist/pubkey.js"
     },
     "./types": {
       "types": "./dist/types.d.ts",
-      "import": "./dist/types.js"
+      "import": "./dist/types.js",
+      "default": "./dist/types.js"
     }
   },
   "files": [
