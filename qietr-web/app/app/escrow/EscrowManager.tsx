@@ -105,6 +105,7 @@ function CreateJobForm() {
   const [agent, setAgent] = useState("");
   const [amount, setAmount] = useState("");
   const [status, setStatus] = useState<Status>({ kind: "idle" });
+  const [balance, setBalance] = useState<string | null>(null);
 
   const cluster = (process.env.NEXT_PUBLIC_QIETR_CLUSTER ?? "devnet").toLowerCase();
   const usdcMint = cluster.includes("mainnet") ? USDC_MINT_MAINNET : USDC_MINT_DEVNET;
@@ -205,6 +206,28 @@ function CreateJobForm() {
     }
   }
 
+  async function checkBalance(): Promise<void> {
+    if (!signer || !connected) {
+      setStatus({ kind: "error", message: "Connect a wallet first." });
+      return;
+    }
+    setBalance("…");
+    try {
+      const ata = findAssociatedTokenAddress(signer.publicKey, usdcMint);
+      let micro = 0n;
+      try {
+        const bal = await connection.getTokenAccountBalance(ata);
+        micro = BigInt(bal.value.amount);
+      } catch {
+        micro = 0n; // no ATA yet → zero balance
+      }
+      setBalance(`${microToUsdc(micro)} USDC`);
+    } catch (e) {
+      setBalance(null);
+      setStatus({ kind: "error", message: e instanceof Error ? e.message : String(e) });
+    }
+  }
+
   return (
     <Card>
       <Field label="Agent (Solana address)">
@@ -227,11 +250,36 @@ function CreateJobForm() {
       <p style={{ color: "var(--text-secondary)", fontSize: "0.8125rem", marginTop: "-0.5rem", marginBottom: "var(--space-4)" }}>
         USDC is transferred from your wallet into the escrow vault on creation.
       </p>
-      <PrimaryBtn
-        label={status.kind === "submitting" ? "Creating…" : "Create escrow"}
-        disabled={!connected || status.kind === "submitting"}
-        onClick={() => void handleCreate()}
-      />
+      <div style={{ display: "flex", alignItems: "center", gap: "var(--space-3)", flexWrap: "wrap" }}>
+        <PrimaryBtn
+          label={status.kind === "submitting" ? "Creating…" : "Create escrow"}
+          disabled={!connected || status.kind === "submitting"}
+          onClick={() => void handleCreate()}
+        />
+        <button
+          type="button"
+          onClick={() => void checkBalance()}
+          disabled={!connected}
+          style={{
+            padding: "var(--space-2) var(--space-4)",
+            borderRadius: "var(--radius-base)",
+            border: "1px solid var(--border-subtle)",
+            background: "var(--surface-0)",
+            cursor: connected ? "pointer" : "not-allowed",
+            opacity: connected ? 1 : 0.5,
+            fontFamily: "inherit",
+            fontSize: "0.875rem",
+            color: "var(--text-primary)",
+          }}
+        >
+          Check balance
+        </button>
+        {balance !== null ? (
+          <span style={{ fontSize: "0.875rem", color: "var(--text-secondary)", fontFamily: "var(--font-mono)" }}>
+            {balance}
+          </span>
+        ) : null}
+      </div>
       <StatusLine status={status} />
     </Card>
   );
