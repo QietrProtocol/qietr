@@ -169,16 +169,20 @@ describe("cancel / resolve / close instructions (hardening)", () => {
     assert.deepEqual(Uint8Array.from(refund.data), Uint8Array.from(cancel.data));
   });
 
-  it("buildResolveDisputeIx is permissionless (no signer) and uses its discriminator", async () => {
+  it("buildResolveDisputeIx requires a caller signer and uses its discriminator", async () => {
     const { buildResolveDisputeIx } = await import("../dist/escrow.js");
     const { sha256 } = await import("@noble/hashes/sha256");
     const jobPda = Keypair.generate().publicKey;
     const vault = Keypair.generate().publicKey;
     const clientAta = Keypair.generate().publicKey;
-    const ix = buildResolveDisputeIx(jobPda, vault, clientAta);
-    // no client signer required — anyone can trigger timeout resolution
-    assert.equal(ix.keys.length, 4);
-    assert.ok(ix.keys.every((k) => !k.isSigner), "resolve_dispute keys must not require a signer");
+    const caller = Keypair.generate().publicKey;
+    const ix = buildResolveDisputeIx(jobPda, vault, clientAta, caller);
+    // resolve_dispute is permissionless (anyone may be the caller) but the
+    // program's ResolveDispute struct still requires a `caller` Signer.
+    // Order: job, escrow_vault, client_ata, caller, token_program.
+    assert.equal(ix.keys.length, 5);
+    assert.equal(ix.keys[3].pubkey.toBase58(), caller.toBase58());
+    assert.equal(ix.keys[3].isSigner, true);
     const disc = sha256(new TextEncoder().encode("global:resolve_dispute")).slice(0, 8);
     assert.deepEqual(Uint8Array.from(ix.data), disc);
   });
