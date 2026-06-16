@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ConnectButton } from "./ConnectButton";
+import { AppOnlyConnectButton } from "./AppOnlyConnectButton";
 
 const linkStyle: React.CSSProperties = {
   color: "var(--text-primary)",
@@ -38,7 +38,7 @@ export function Nav() {
         <Link href="/token/" style={linkStyle}>Token</Link>
         <Link href="/security/" style={linkStyle}>Security</Link>
         <Link href="/brand/" style={linkStyle}>Brand</Link>
-        <ConnectButton />
+        <AppOnlyConnectButton />
       </div>
     </nav>
   );
