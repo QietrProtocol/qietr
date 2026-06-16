@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { PublicKey, Transaction } from "@solana/web3.js";
+import { PublicKey, Transaction, TransactionInstruction } from "@solana/web3.js";
 import { useConnection } from "@solana/wallet-adapter-react";
 import {
   QIETR_ESCROW_PROGRAM_ID,
@@ -362,6 +362,9 @@ function BrowseJobs() {
     try {
       const jobPda = new PublicKey(job.jobPda);
       let ix;
+      // Instructions to run before the action ix (e.g. ensuring a payout ATA
+      // exists). Kept separate so each action opts in explicitly.
+      const preIxs: TransactionInstruction[] = [];
 
       switch (action) {
         case "accept":
@@ -376,9 +379,14 @@ function BrowseJobs() {
               new PublicKey(job.client),
               Buffer.from(job.nonce, "hex"),
             );
-            const agentAta = findAssociatedTokenAddress(
-              new PublicKey(job.agent),
-              USDC_MINT_DEVNET,
+            const agent = new PublicKey(job.agent);
+            const agentAta = findAssociatedTokenAddress(agent, USDC_MINT_DEVNET);
+            // release_payment pays into agent_ata, which must already exist (a
+            // plain Account<TokenAccount>). If the receiver never held USDC the
+            // ATA is missing → AccountNotInitialized. The client (signer) funds
+            // an idempotent create so the payout lands on the first try.
+            preIxs.push(
+              buildCreateAtaIdempotentIx(signer.publicKey, agent, USDC_MINT_DEVNET),
             );
             ix = buildReleasePaymentIx(jobPda, vaultPda, agentAta, signer.publicKey);
           }
@@ -407,7 +415,7 @@ function BrowseJobs() {
       }
 
       const tx = new Transaction();
-      tx.add(ix);
+      tx.add(...preIxs, ix);
       tx.feePayer = signer.publicKey;
 
       const bh = await connection.getLatestBlockhash("confirmed");
