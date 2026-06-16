@@ -2,6 +2,7 @@ import { Card } from "../../_components/Card";
 import { DepositBanner } from "./DepositBanner";
 import { FaucetCallout } from "./FaucetCallout";
 import { TierPicker } from "./TierPicker";
+import { WalletBalance } from "./WalletBalance";
 
 export default function DepositPage() {
   return (
@@ -22,6 +23,12 @@ export default function DepositPage() {
       <div style={{ height: "var(--space-6)" }} />
 
       <FaucetCallout />
+
+      <div style={{ height: "var(--space-6)" }} />
+
+      <Card>
+        <WalletBalance />
+      </Card>
 
       <div style={{ height: "var(--space-6)" }} />
 
