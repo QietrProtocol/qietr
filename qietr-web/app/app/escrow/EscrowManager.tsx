@@ -213,18 +213,24 @@ function CreateJobForm() {
     }
     setBalance("…");
     try {
-      const ata = findAssociatedTokenAddress(signer.publicKey, usdcMint);
-      let micro = 0n;
-      try {
-        const bal = await connection.getTokenAccountBalance(ata);
-        micro = BigInt(bal.value.amount);
-      } catch {
-        micro = 0n; // no ATA yet → zero balance
+      const owner = signer.publicKey;
+      const ata = findAssociatedTokenAddress(owner, usdcMint);
+      const short = `${owner.toBase58().slice(0, 4)}…${owner.toBase58().slice(-4)}`;
+      // Distinguish "no token account yet" (legit zero) from an RPC failure —
+      // otherwise both look like a flat 0 and hide why funds aren't showing.
+      const info = await connection.getAccountInfo(ata);
+      if (!info) {
+        setBalance(`0.000000 USDC — ${short} has no USDC account yet`);
+        return;
       }
-      setBalance(`${microToUsdc(micro)} USDC`);
+      const bal = await connection.getTokenAccountBalance(ata);
+      setBalance(`${microToUsdc(BigInt(bal.value.amount))} USDC — ${short}`);
     } catch (e) {
       setBalance(null);
-      setStatus({ kind: "error", message: e instanceof Error ? e.message : String(e) });
+      setStatus({
+        kind: "error",
+        message: `Balance check failed (RPC): ${e instanceof Error ? e.message : String(e)}`,
+      });
     }
   }
 
