@@ -1,8 +1,9 @@
 // =============================================================================
 // qietr-pool.ts — primary integration test suite.
 //
-// Run via `anchor test` from `qietr-pool/`. Each `describe` block creates
-// its own admin + mint so suites don't bleed into each other.
+// Run via `anchor test` from `qietr-pool/`. The pool config is a singleton, so
+// the suite shares one admin + mint (see helpers.ts); each test isolates itself
+// with a unique `denomId` instead.
 // =============================================================================
 
 import * as anchor from "@coral-xyz/anchor";
@@ -31,6 +32,7 @@ import {
   initTier,
   loadProgram,
   MERKLE_DEPTH,
+  nextDenomId,
   PAY_TIER_MICRO,
   runWithdraw,
   setupBaseFixture,
@@ -45,7 +47,7 @@ describe("qietr_pool — happy paths", () => {
   it("initialize_pool + initialize_denomination set up tier + tree", async () => {
     const program = await loadProgram();
     const fixture = await setupBaseFixture(provider, program);
-    const denomId = 2;
+    const denomId = nextDenomId();
     const { denomination, tree } = await initTier(
       fixture,
       denomId,
@@ -69,7 +71,7 @@ describe("qietr_pool — happy paths", () => {
   it("deposit transfers USDC into vault and appends commitment", async () => {
     const program = await loadProgram();
     const fixture = await setupBaseFixture(provider, program);
-    const denomId = 2;
+    const denomId = nextDenomId();
     const { denomination, vault } = await initTier(
       fixture,
       denomId,
@@ -97,7 +99,7 @@ describe("qietr_pool — happy paths", () => {
   it("withdraw releases payment + change to recipient ATA", async () => {
     const program = await loadProgram();
     const fixture = await setupBaseFixture(provider, program);
-    const denomId = 2;
+    const denomId = nextDenomId();
     await initTier(fixture, denomId, PAY_TIER_MICRO);
 
     const ctx = await createFundedDepositor(fixture, PAY_TIER_MICRO);
@@ -145,7 +147,7 @@ describe("qietr_pool — rejection paths", () => {
   it("rejects a second withdraw with the same nullifier (double-spend)", async () => {
     const program = await loadProgram();
     const fixture = await setupBaseFixture(provider, program);
-    const denomId = 2;
+    const denomId = nextDenomId();
     await initTier(fixture, denomId, PAY_TIER_MICRO);
 
     const ctx = await createFundedDepositor(fixture, PAY_TIER_MICRO);
@@ -206,7 +208,7 @@ describe("qietr_pool — rejection paths", () => {
   it("rejects a withdraw whose root is older than the 30-root window", async () => {
     const program = await loadProgram();
     const fixture = await setupBaseFixture(provider, program);
-    const denomId = 2;
+    const denomId = nextDenomId();
     await initTier(fixture, denomId, PAY_TIER_MICRO);
 
     const ctx = await createFundedDepositor(
@@ -264,7 +266,7 @@ describe("qietr_pool — rejection paths", () => {
   it("rejects a recipient_ata whose owner doesn't match the proof signal", async () => {
     const program = await loadProgram();
     const fixture = await setupBaseFixture(provider, program);
-    const denomId = 2;
+    const denomId = nextDenomId();
     await initTier(fixture, denomId, PAY_TIER_MICRO);
 
     const ctx = await createFundedDepositor(fixture, PAY_TIER_MICRO);
@@ -312,7 +314,7 @@ describe("qietr_pool — rejection paths", () => {
   it("rejects a withdraw when the pool is paused", async () => {
     const program = await loadProgram();
     const fixture = await setupBaseFixture(provider, program);
-    const denomId = 2;
+    const denomId = nextDenomId();
     await initTier(fixture, denomId, PAY_TIER_MICRO);
 
     const ctx = await createFundedDepositor(fixture, PAY_TIER_MICRO);
@@ -360,13 +362,25 @@ describe("qietr_pool — rejection paths", () => {
     } catch (e: any) {
       errMsg = String(e);
     }
+
+    // The config is shared across the whole suite, so restore the unpaused
+    // state before asserting — otherwise later withdraw tests fail with Paused.
+    await program.methods
+      .setPaused(false)
+      .accounts({
+        config: fixture.configPda,
+        admin: fixture.admin.publicKey,
+      })
+      .signers([fixture.admin])
+      .rpc();
+
     expect(errMsg).to.match(/Paused/);
   });
 
   it("rejects a non-canonical recipient ATA (bug #5 fix)", async () => {
     const program = await loadProgram();
     const fixture = await setupBaseFixture(provider, program);
-    const denomId = 2;
+    const denomId = nextDenomId();
     await initTier(fixture, denomId, PAY_TIER_MICRO);
 
     const ctx = await createFundedDepositor(fixture, PAY_TIER_MICRO);
@@ -407,7 +421,7 @@ describe("qietr_pool — rejection paths", () => {
   it("rejects withdraw with a nullifier_hash arg different from the proof signal", async () => {
     const program = await loadProgram();
     const fixture = await setupBaseFixture(provider, program);
-    const denomId = 2;
+    const denomId = nextDenomId();
     await initTier(fixture, denomId, PAY_TIER_MICRO);
 
     const ctx = await createFundedDepositor(fixture, PAY_TIER_MICRO);

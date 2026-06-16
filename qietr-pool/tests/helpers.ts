@@ -5,7 +5,8 @@
 //   * one local validator (started by `anchor test`),
 //   * one program instance loaded via Anchor IDL,
 //   * a mint we create + control so we can faucet USDC freely,
-//   * a fresh admin keypair per `before()` so each suite is isolated.
+//   * one shared admin keypair (the singleton pool config can only be
+//     initialized once per validator; isolation is per-`denomId` instead).
 //
 // Proofs are produced via @qietr/sdk's prover against the dev VK baked
 // into the on-chain `verifier::VERIFYINGKEY` const.
@@ -106,12 +107,22 @@ export async function fundAirdrop(
   );
 }
 
+// The pool config is a global singleton (`seeds = [b"config"]`), so
+// `initialize_pool` can succeed exactly once per validator. `anchor test` runs
+// the whole suite against one validator, so every test shares a single config,
+// admin, and mint. We init lazily on the first call and hand back the cached
+// fixture thereafter; per-test isolation comes from a unique `denomId` (the
+// denom/tree/vault PDAs are keyed by it) — see `nextDenomId`.
+let sharedFixture: Fixture | null = null;
+
 export async function setupBaseFixture(
   provider: AnchorProvider,
   program: Program<any>,
 ): Promise<Fixture> {
+  if (sharedFixture) return sharedFixture;
+
   const admin = Keypair.generate();
-  await fundAirdrop(provider, admin.publicKey, 5);
+  await fundAirdrop(provider, admin.publicKey, 50);
 
   // Create a test mint we control (6 decimals like USDC).
   const mint = await createMint(
@@ -134,7 +145,16 @@ export async function setupBaseFixture(
     .signers([admin])
     .rpc();
 
-  return { provider, program, admin, mint, configPda };
+  sharedFixture = { provider, program, admin, mint, configPda };
+  return sharedFixture;
+}
+
+// Monotonic denomination-id allocator. Each test claims a fresh id so its
+// denom/tree/vault PDAs don't collide with another test's on the shared
+// validator. `denom_id` is a u8 with no on-chain allow-list.
+let denomCounter = 1;
+export function nextDenomId(): number {
+  return denomCounter++;
 }
 
 export async function initTier(
