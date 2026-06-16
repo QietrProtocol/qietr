@@ -309,23 +309,34 @@ function BrowseJobs() {
     setError(null);
     try {
       const pubkey = new PublicKey(address);
-      const accounts = await connection.getProgramAccounts(QIETR_ESCROW_PROGRAM_ID, {
-        filters: [
-          { dataSize: JOB_ACCOUNT_SIZE },
-          {
-            memcmp: {
-              offset: 8,
-              bytes: pubkey.toBase58(),
-            },
-          },
-        ],
-      });
+      // A wallet can be on either side of a job: the client (Job.client, byte
+      // offset 8) or the agent/receiver (Job.agent, offset 40). Query both
+      // positions and merge so receivers actually see jobs assigned to them
+      // (otherwise the agent could never Accept).
+      const [asClient, asAgent] = await Promise.all([
+        connection.getProgramAccounts(QIETR_ESCROW_PROGRAM_ID, {
+          filters: [
+            { dataSize: JOB_ACCOUNT_SIZE },
+            { memcmp: { offset: 8, bytes: pubkey.toBase58() } },
+          ],
+        }),
+        connection.getProgramAccounts(QIETR_ESCROW_PROGRAM_ID, {
+          filters: [
+            { dataSize: JOB_ACCOUNT_SIZE },
+            { memcmp: { offset: 40, bytes: pubkey.toBase58() } },
+          ],
+        }),
+      ]);
 
+      const seen = new Set<string>();
       const all: JobRow[] = [];
-      for (const { account, pubkey } of accounts) {
+      for (const { account, pubkey: pk } of [...asClient, ...asAgent]) {
+        const key = pk.toBase58();
+        if (seen.has(key)) continue;
+        seen.add(key);
         const job = parseJobAccount(account.data as Uint8Array);
         if (job) {
-          all.push({ ...job, jobPda: pubkey.toBase58() });
+          all.push({ ...job, jobPda: key });
         }
       }
       all.sort((a, b) => b.createdAt - a.createdAt);
