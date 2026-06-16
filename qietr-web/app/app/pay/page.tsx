@@ -1,4 +1,6 @@
 import { ConfiguredBanner } from "../../_components/ConfiguredBanner";
+import { Card } from "../../_components/Card";
+import { WalletBalance } from "../../_components/WalletBalance";
 import { FaucetCallout } from "../deposit/FaucetCallout";
 import { PayForms } from "./PayForms";
 
@@ -33,6 +35,12 @@ export default function PayPage() {
           </>
         }
       />
+
+      <div style={{ height: "var(--space-6)" }} />
+
+      <Card>
+        <WalletBalance />
+      </Card>
 
       <div style={{ height: "var(--space-6)" }} />
 

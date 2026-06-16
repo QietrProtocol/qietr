@@ -1,20 +1,22 @@
 "use client";
 
 // =============================================================================
-// WalletBalance — on-demand balance check for the connected wallet.
+// WalletBalance — on-demand + auto wallet balance for the connected wallet.
 //
-// Shows SOL (for transaction fees) and USDC (the deposit token) so a tester can
-// confirm they actually claimed funds from the faucets before depositing. The
-// USDC mint is the exact one the pool accepts, derived from the cluster — the
-// same mint shown in FaucetCallout — so a zero balance here means the wrong
-// token was claimed, not that the deposit will mysteriously fail later.
+// Shows SOL (for transaction fees) and USDC (the deposit token) so a user can
+// see their wallet balance on any app page. Auto-fetches on connect / address
+// change, with a manual "Refresh" for re-checks (e.g. after a faucet claim).
+// The USDC mint is the exact one the pool accepts, derived from the cluster —
+// a zero USDC reading flags a wrong-mint claim early.
+//
+// Shared across all /app pages. Render it inside a <Card> for consistent chrome.
 // =============================================================================
 
 import { useEffect, useState } from "react";
 import { useConnection } from "@solana/wallet-adapter-react";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { USDC_MINT_DEVNET, USDC_MINT_MAINNET, findAssociatedTokenAddress } from "@qietr/sdk";
-import { useWalletSigner } from "../../_lib/use-sdk";
+import { useWalletSigner } from "../_lib/use-sdk";
 
 function usdcMintForCluster() {
   const raw = (process.env.NEXT_PUBLIC_QIETR_CLUSTER ?? "devnet").toLowerCase();
@@ -66,10 +68,10 @@ export function WalletBalance() {
   }
 
   // Auto-fetch the latest balance whenever a wallet connects or the connected
-  // address changes, so the user never has to click to see their starting
-  // balance. The manual "Refresh" button stays for on-demand re-checks (e.g.
-  // right after claiming from a faucet). Keyed on `address` so it fires once
-  // per connected wallet, not on every render.
+  // address changes, so the user never has to click to see their balance. The
+  // manual "Refresh" button stays for on-demand re-checks (e.g. right after
+  // claiming from a faucet). Keyed on `address` so it fires once per connected
+  // wallet, not on every render.
   useEffect(() => {
     if (!connected || !address) {
       setState({ kind: "idle" });

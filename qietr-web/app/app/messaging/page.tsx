@@ -1,3 +1,5 @@
+import { Card } from "../../_components/Card";
+import { WalletBalance } from "../../_components/WalletBalance";
 import { FaucetCallout } from "../deposit/FaucetCallout";
 import { MessagingManager } from "./MessagingManager";
 
@@ -16,6 +18,12 @@ export default function MessagingPage() {
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-6)" }}>
         Encrypted on-chain messaging between agents and humans.
       </p>
+
+      <Card>
+        <WalletBalance />
+      </Card>
+
+      <div style={{ height: "var(--space-6)" }} />
 
       <FaucetCallout />
 

@@ -1,4 +1,6 @@
 import { ConfiguredBanner } from "../../_components/ConfiguredBanner";
+import { Card } from "../../_components/Card";
+import { WalletBalance } from "../../_components/WalletBalance";
 import { FaucetCallout } from "../deposit/FaucetCallout";
 import { NoteManager } from "./NoteManager";
 
@@ -35,6 +37,12 @@ export default function NotePage() {
           </>
         }
       />
+
+      <div style={{ height: "var(--space-6)" }} />
+
+      <Card>
+        <WalletBalance />
+      </Card>
 
       <div style={{ height: "var(--space-6)" }} />
 

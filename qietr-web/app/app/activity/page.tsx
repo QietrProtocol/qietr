@@ -1,3 +1,5 @@
+import { Card } from "../../_components/Card";
+import { WalletBalance } from "../../_components/WalletBalance";
 import { ActivityList } from "./ActivityList";
 
 export default function ActivityPage() {
@@ -14,6 +16,12 @@ export default function ActivityPage() {
         Local-only event log. Nothing is sent to a server. Cleared with your
         browser data, or with the Clear button below.
       </p>
+
+      <Card>
+        <WalletBalance />
+      </Card>
+
+      <div style={{ height: "var(--space-6)" }} />
 
       <ActivityList />
     </main>

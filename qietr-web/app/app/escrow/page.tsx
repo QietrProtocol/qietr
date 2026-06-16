@@ -1,3 +1,5 @@
+import { Card } from "../../_components/Card";
+import { WalletBalance } from "../../_components/WalletBalance";
 import { FaucetCallout } from "../deposit/FaucetCallout";
 import { EscrowManager } from "./EscrowManager";
 
@@ -16,6 +18,12 @@ export default function EscrowPage() {
       <p style={{ color: "var(--text-secondary)", marginBottom: "var(--space-6)" }}>
         Trust-minimized payments between clients and agents.
       </p>
+
+      <Card>
+        <WalletBalance />
+      </Card>
+
+      <div style={{ height: "var(--space-6)" }} />
 
       <FaucetCallout />
 

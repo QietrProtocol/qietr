@@ -2,7 +2,7 @@ import { Card } from "../../_components/Card";
 import { DepositBanner } from "./DepositBanner";
 import { FaucetCallout } from "./FaucetCallout";
 import { TierPicker } from "./TierPicker";
-import { WalletBalance } from "./WalletBalance";
+import { WalletBalance } from "../../_components/WalletBalance";
 
 export default function DepositPage() {
   return (
