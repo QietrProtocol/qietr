@@ -43,6 +43,9 @@ const USDC_DECIMALS = 1_000_000;
 // Must match DISPUTE_TIMEOUT_SECONDS in the qietr_escrow program: a disputed
 // job can only be resolved (auto-refund to the client) 7 days after completion.
 const DISPUTE_TIMEOUT_SECONDS = 7 * 24 * 3600;
+// Must match ACCEPT_TIMEOUT_SECONDS: an accepted-but-never-completed job can
+// only be cancelled (refunded to the client) 7 days after acceptance.
+const ACCEPT_TIMEOUT_SECONDS = 7 * 24 * 3600;
 
 const STATE_LABELS: Record<JobState, string> = {
   [JobState.Created]: "Created",
@@ -427,6 +430,22 @@ function BrowseJobs() {
           break;
         case "cancel":
           {
+            // cancel_job is instant while Created, but an Accepted job can only
+            // be cancelled after the 7-day accept timeout (so an agent can't be
+            // rugged mid-work). Guard client-side for a clear message.
+            if (job.state === JobState.Accepted) {
+              const readyAt = job.acceptedAt + ACCEPT_TIMEOUT_SECONDS;
+              const now = Math.floor(Date.now() / 1000);
+              if (now < readyAt) {
+                setStatus({
+                  kind: "error",
+                  message:
+                    `An accepted job can only be cancelled 7 days after acceptance ` +
+                    `if the agent never completes it. Available ${new Date(readyAt * 1000).toLocaleString()}.`,
+                });
+                return;
+              }
+            }
             const [vaultPda] = findEscrowVaultPda(
               new PublicKey(job.client),
               Buffer.from(job.nonce, "hex"),
@@ -476,10 +495,26 @@ function BrowseJobs() {
     }
     if (state === JobState.Accepted) {
       if (isAgent) return [{ label: "Complete", action: "complete" }];
-      if (isClient) return [{ label: "Dispute", action: "dispute" }];
+      // The client cannot dispute yet (dispute_job needs Completed). Their only
+      // recourse is a timeout-gated cancel if the agent never completes.
+      if (isClient) {
+        const readyAt = job.acceptedAt + ACCEPT_TIMEOUT_SECONDS;
+        const now = Math.floor(Date.now() / 1000);
+        const label =
+          now >= readyAt
+            ? "Cancel (refund)"
+            : `Cancel — available ${new Date(readyAt * 1000).toLocaleDateString()}`;
+        return [{ label, action: "cancel" }];
+      }
     }
     if (state === JobState.Completed) {
-      if (isClient) return [{ label: "Release payment", action: "release" }];
+      // Now the client chooses: pay the agent, or dispute (starts the 7-day
+      // refund timer). dispute_job is only valid in this state.
+      if (isClient)
+        return [
+          { label: "Release payment", action: "release" },
+          { label: "Dispute", action: "dispute" },
+        ];
     }
     if (state === JobState.Disputed && isClient) {
       const readyAt = job.completedAt + DISPUTE_TIMEOUT_SECONDS;
